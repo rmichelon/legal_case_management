@@ -1,6 +1,6 @@
-import { eq } from "drizzle-orm";
+import { eq, and, desc, like, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +89,236 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+// ============ CLIENTS QUERIES ============
+
+export async function getClientsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(clients).where(eq(clients.userId, userId));
+}
+
+export async function getClientById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(clients).where(eq(clients.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createClient(data: typeof clients.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(clients).values(data);
+  return result;
+}
+
+export async function updateClient(id: number, data: Partial<typeof clients.$inferInsert>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(clients).set(data).where(eq(clients.id, id));
+}
+
+export async function deleteClient(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(clients).where(eq(clients.id, id));
+}
+
+// ============ CASES QUERIES ============
+
+export async function getCasesByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(cases).where(eq(cases.userId, userId)).orderBy(desc(cases.createdAt));
+}
+
+export async function getCaseById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(cases).where(eq(cases.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getCaseByCaseNumber(caseNumber: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(cases).where(eq(cases.caseNumber, caseNumber)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createCase(data: typeof cases.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(cases).values(data);
+}
+
+export async function updateCase(id: number, data: Partial<typeof cases.$inferInsert>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(cases).set(data).where(eq(cases.id, id));
+}
+
+export async function deleteCase(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(cases).where(eq(cases.id, id));
+}
+
+export async function searchCases(userId: number, query: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(cases).where(
+    and(
+      eq(cases.userId, userId),
+      like(cases.title, `%${query}%`)
+    )
+  );
+}
+
+// ============ DEADLINES QUERIES ============
+
+export async function getDeadlinesByCaseId(caseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(deadlines).where(eq(deadlines.caseId, caseId)).orderBy(deadlines.dueDate);
+}
+
+export async function getUpcomingDeadlinesByUserId(userId: number, daysAhead: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const now = new Date();
+  const futureDate = new Date(now.getTime() + daysAhead * 24 * 60 * 60 * 1000);
+
+  return await db.select().from(deadlines)
+    .innerJoin(cases, eq(deadlines.caseId, cases.id))
+    .where(
+      and(
+        eq(cases.userId, userId),
+        eq(deadlines.status, 'pending'),
+        gte(deadlines.dueDate, now),
+        lte(deadlines.dueDate, futureDate)
+      )
+    )
+    .orderBy(deadlines.dueDate);
+}
+
+export async function getDeadlineById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(deadlines).where(eq(deadlines.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createDeadline(data: typeof deadlines.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(deadlines).values(data);
+}
+
+export async function updateDeadline(id: number, data: Partial<typeof deadlines.$inferInsert>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(deadlines).set(data).where(eq(deadlines.id, id));
+}
+
+// ============ DOCUMENTS QUERIES ============
+
+export async function getDocumentsByCaseId(caseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(documents).where(eq(documents.caseId, caseId)).orderBy(desc(documents.createdAt));
+}
+
+export async function getDocumentById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(documents).where(eq(documents.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createDocument(data: typeof documents.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(documents).values(data);
+}
+
+export async function deleteDocument(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(documents).where(eq(documents.id, id));
+}
+
+// ============ MOVEMENTS QUERIES ============
+
+export async function getMovementsByCaseId(caseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(movements).where(eq(movements.caseId, caseId)).orderBy(desc(movements.date));
+}
+
+export async function createMovement(data: typeof movements.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(movements).values(data);
+}
+
+// ============ CHAT HISTORY QUERIES ============
+
+export async function getChatHistoryByUserId(userId: number, limit: number = 10) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(chatHistory).where(eq(chatHistory.userId, userId)).orderBy(desc(chatHistory.createdAt)).limit(limit);
+}
+
+export async function createChatHistory(data: typeof chatHistory.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(chatHistory).values(data);
+}
+
+export async function updateChatHistory(id: number, data: Partial<typeof chatHistory.$inferInsert>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(chatHistory).set(data).where(eq(chatHistory.id, id));
+}
+
+// ============ EMAIL ALERTS QUERIES ============
+
+export async function createEmailAlert(data: typeof emailAlerts.$inferInsert) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(emailAlerts).values(data);
+}
+
+export async function getEmailAlertsByDeadlineId(deadlineId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(emailAlerts).where(eq(emailAlerts.deadlineId, deadlineId));
+}

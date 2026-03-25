@@ -4,17 +4,34 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import Navigation from "./components/Navigation";
 import Home from "./pages/Home";
+import Dashboard from "./pages/Dashboard";
+import CaseForm from "./pages/CaseForm";
+import CaseDetail from "./pages/CaseDetail";
+import Clients from "./pages/Clients";
+import SearchCases from "./pages/SearchCases";
+import ChatBot from "./pages/ChatBot";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
-    <Switch>
-      <Route path={"/"} component={Home} />
-      <Route path={"/404"} component={NotFound} />
-      {/* Final fallback route */}
-      <Route component={NotFound} />
-    </Switch>
+    <>
+      <Navigation />
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/dashboard" component={Dashboard} />
+        <Route path="/cases/new" component={() => <CaseForm caseId={undefined} />} />
+        <Route path="/cases/:id/edit" component={(props: any) => <CaseForm caseId={props.id} />} />
+        <Route path="/cases/:id" component={(props: any) => <CaseDetail caseId={props.id} />} />
+        <Route path="/search" component={SearchCases} />
+        <Route path="/chat" component={ChatBot} />
+        <Route path="/clients" component={Clients} />
+        <Route path="/404" component={NotFound} />
+        {/* Final fallback route */}
+        <Route component={NotFound} />
+      </Switch>
+    </>
   );
 }
 
