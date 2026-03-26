@@ -13,9 +13,11 @@ import { wsManager } from "./websocket";
 import { googleCalendarRouter } from "./googleCalendarRouter";
 import { webhookRouter } from "./webhookRouter";
 import { caseManagementRouter } from "./caseManagementRouter";
+import { monitoringRouter } from "./monitoringRouter";
 
 export const appRouter = router({
   system: systemRouter,
+  monitoring: monitoringRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

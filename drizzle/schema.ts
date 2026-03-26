@@ -458,3 +458,154 @@ export const auditLog = mysqlTable("auditLog", {
 
 export type AuditLog = typeof auditLog.$inferSelect;
 export type InsertAuditLog = typeof auditLog.$inferInsert;
+
+
+/**
+ * Tribunal Integration Monitoring - tracks health and status of tribunal APIs
+ */
+export const tribunalHealthCheck = mysqlTable('tribunalHealthCheck', {
+  id: int('id').autoincrement().primaryKey(),
+  tribunal: mysqlEnum('tribunal', ['tjsp', 'tjmg', 'tjms']).notNull(),
+  status: mysqlEnum('status', ['healthy', 'degraded', 'down']).default('healthy').notNull(),
+  responseTime: int('responseTime'), // milliseconds
+  lastCheckAt: timestamp('lastCheckAt').notNull(),
+  lastSuccessAt: timestamp('lastSuccessAt'),
+  lastFailureAt: timestamp('lastFailureAt'),
+  failureCount: int('failureCount').default(0),
+  successCount: int('successCount').default(0),
+  errorMessage: text('errorMessage'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+
+export type TribunalHealthCheck = typeof tribunalHealthCheck.$inferSelect;
+export type InsertTribunalHealthCheck = typeof tribunalHealthCheck.$inferInsert;
+
+/**
+ * Synchronization Metrics - tracks performance of tribunal data synchronizations
+ */
+export const syncMetrics = mysqlTable('syncMetrics', {
+  id: int('id').autoincrement().primaryKey(),
+  caseId: int('caseId').notNull(),
+  userId: int('userId').notNull(),
+  tribunal: mysqlEnum('tribunal', ['tjsp', 'tjmg', 'tjms']).notNull(),
+  syncType: mysqlEnum('syncType', ['full', 'incremental', 'manual']).default('manual').notNull(),
+  status: mysqlEnum('status', ['pending', 'in_progress', 'success', 'failed']).default('pending').notNull(),
+  startTime: timestamp('startTime').notNull(),
+  endTime: timestamp('endTime'),
+  duration: int('duration'), // milliseconds
+  recordsProcessed: int('recordsProcessed').default(0),
+  recordsUpdated: int('recordsUpdated').default(0),
+  recordsCreated: int('recordsCreated').default(0),
+  recordsFailed: int('recordsFailed').default(0),
+  errorMessage: text('errorMessage'),
+  retryCount: int('retryCount').default(0),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+
+export type SyncMetrics = typeof syncMetrics.$inferSelect;
+export type InsertSyncMetrics = typeof syncMetrics.$inferInsert;
+
+/**
+ * API Error Log - tracks errors from tribunal APIs for debugging
+ */
+export const apiErrorLog = mysqlTable('apiErrorLog', {
+  id: int('id').autoincrement().primaryKey(),
+  tribunal: mysqlEnum('tribunal', ['tjsp', 'tjmg', 'tjms']).notNull(),
+  endpoint: varchar('endpoint', { length: 500 }).notNull(),
+  method: varchar('method', { length: 10 }).notNull(), // GET, POST, etc
+  statusCode: int('statusCode'),
+  errorType: varchar('errorType', { length: 100 }).notNull(), // e.g., "TIMEOUT", "AUTH_FAILED", "RATE_LIMIT"
+  errorMessage: text('errorMessage'),
+  requestPayload: text('requestPayload'), // JSON
+  responsePayload: text('responsePayload'), // JSON
+  userId: int('userId'),
+  caseId: int('caseId'),
+  severity: mysqlEnum('severity', ['low', 'medium', 'high', 'critical']).default('medium').notNull(),
+  resolved: boolean('resolved').default(false),
+  resolvedAt: timestamp('resolvedAt'),
+  resolvedBy: int('resolvedBy'),
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+
+export type ApiErrorLog = typeof apiErrorLog.$inferSelect;
+export type InsertApiErrorLog = typeof apiErrorLog.$inferInsert;
+
+/**
+ * Integration Alerts - tracks alerts triggered by integration issues
+ */
+export const integrationAlerts = mysqlTable('integrationAlerts', {
+  id: int('id').autoincrement().primaryKey(),
+  tribunal: mysqlEnum('tribunal', ['tjsp', 'tjmg', 'tjms']).notNull(),
+  alertType: mysqlEnum('alertType', ['health_check_failed', 'sync_failed', 'rate_limit_exceeded', 'auth_failed', 'timeout', 'high_error_rate']).notNull(),
+  severity: mysqlEnum('severity', ['warning', 'error', 'critical']).default('error').notNull(),
+  title: varchar('title', { length: 255 }).notNull(),
+  description: text('description'),
+  affectedCases: int('affectedCases').default(0),
+  triggeredAt: timestamp('triggeredAt').notNull(),
+  resolvedAt: timestamp('resolvedAt'),
+  acknowledged: boolean('acknowledged').default(false),
+  acknowledgedBy: int('acknowledgedBy'),
+  acknowledgedAt: timestamp('acknowledgedAt'),
+  metadata: text('metadata'), // JSON with additional context
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+
+export type IntegrationAlert = typeof integrationAlerts.$inferSelect;
+export type InsertIntegrationAlert = typeof integrationAlerts.$inferInsert;
+
+/**
+ * Performance Report - aggregated performance metrics for reporting
+ */
+export const performanceReport = mysqlTable('performanceReport', {
+  id: int('id').autoincrement().primaryKey(),
+  tribunal: mysqlEnum('tribunal', ['tjsp', 'tjmg', 'tjms']).notNull(),
+  reportDate: timestamp('reportDate').notNull(),
+  period: mysqlEnum('period', ['daily', 'weekly', 'monthly']).notNull(),
+  totalSyncs: int('totalSyncs').default(0),
+  successfulSyncs: int('successfulSyncs').default(0),
+  failedSyncs: int('failedSyncs').default(0),
+  successRate: decimal('successRate', { precision: 5, scale: 2 }).default('0.00'), // percentage
+  averageResponseTime: int('averageResponseTime'), // milliseconds
+  minResponseTime: int('minResponseTime'),
+  maxResponseTime: int('maxResponseTime'),
+  totalRecordsProcessed: int('totalRecordsProcessed').default(0),
+  totalErrors: int('totalErrors').default(0),
+  uptime: decimal('uptime', { precision: 5, scale: 2 }).default('100.00'), // percentage
+  notes: text('notes'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+});
+
+export type PerformanceReport = typeof performanceReport.$inferSelect;
+export type InsertPerformanceReport = typeof performanceReport.$inferInsert;
+
+/**
+ * Integration Configuration - stores tribunal-specific API configuration
+ */
+export const integrationConfig = mysqlTable('integrationConfig', {
+  id: int('id').autoincrement().primaryKey(),
+  userId: int('userId').notNull(),
+  tribunal: mysqlEnum('tribunal', ['tjsp', 'tjmg', 'tjms']).notNull(),
+  isActive: boolean('isActive').default(true).notNull(),
+  apiUrl: varchar('apiUrl', { length: 500 }).notNull(),
+  authType: mysqlEnum('authType', ['certificate', 'api_key', 'oauth', 'basic_auth']).notNull(),
+  credentials: text('credentials').notNull(), // JSON encrypted
+  certificatePath: varchar('certificatePath', { length: 500 }), // for TJSP
+  apiKey: varchar('apiKey', { length: 500 }), // for TJMG
+  oauthClientId: varchar('oauthClientId', { length: 500 }), // for TJMS
+  oauthClientSecret: varchar('oauthClientSecret', { length: 500 }), // for TJMS
+  syncInterval: int('syncInterval').default(3600), // seconds
+  retryAttempts: int('retryAttempts').default(3),
+  retryDelay: int('retryDelay').default(5000), // milliseconds
+  enableHealthCheck: boolean('enableHealthCheck').default(true),
+  healthCheckInterval: int('healthCheckInterval').default(300), // seconds
+  lastTestedAt: timestamp('lastTestedAt'),
+  testStatus: mysqlEnum('testStatus', ['success', 'failed', 'not_tested']).default('not_tested'),
+  testErrorMessage: text('testErrorMessage'),
+  createdAt: timestamp('createdAt').defaultNow().notNull(),
+  updatedAt: timestamp('updatedAt').defaultNow().onUpdateNow().notNull(),
+});
+
+export type IntegrationConfig = typeof integrationConfig.$inferSelect;
+export type InsertIntegrationConfig = typeof integrationConfig.$inferInsert;

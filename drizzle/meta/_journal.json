@@ -43,6 +43,13 @@
       "when": 1774549770917,
       "tag": "0005_icy_silhouette",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "5",
+      "when": 1774551396986,
+      "tag": "0006_sharp_micromacro",
+      "breakpoints": true
     }
   ]
 }

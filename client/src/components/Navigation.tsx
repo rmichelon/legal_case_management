@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { FileText, Search, MessageSquare, Users, LogOut, Bell, Calendar } from "lucide-react";
+import { FileText, Search, MessageSquare, Users, LogOut, Bell, Calendar, TrendingUp } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 
 export default function Navigation() {
@@ -79,6 +79,15 @@ export default function Navigation() {
             >
               <Calendar className="w-4 h-4" />
               Agenda
+            </Button>
+
+            <Button
+              variant={isActive("/monitoring") ? "default" : "ghost"}
+              onClick={() => navigate("/monitoring")}
+              className="gap-2"
+            >
+              <TrendingUp className="w-4 h-4" />
+              Monitoramento
             </Button>
           </div>
         </div>
