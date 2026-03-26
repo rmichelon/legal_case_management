@@ -31,14 +31,21 @@ export default function NotificationBell() {
   );
 
   useEffect(() => {
-    if (!wsStatus.connected) return;
     const handleNotification = () => {
       refetchUnread();
       refetchRecent();
     };
     on("notification", handleNotification);
     return () => off("notification", handleNotification);
-  }, [wsStatus.connected, on, off, refetchUnread, refetchRecent]);
+  }, [on, off, refetchUnread, refetchRecent]);
+
+  useEffect(() => {
+    if (wsStatus.connected || !isAuthenticated) return;
+    const pollInterval = setInterval(() => {
+      refetchUnread();
+    }, 10000);
+    return () => clearInterval(pollInterval);
+  }, [wsStatus.connected, isAuthenticated, refetchUnread]);
 
   const markAsReadMutation = trpc.notifications.markAsRead.useMutation();
 

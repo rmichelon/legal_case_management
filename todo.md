@@ -67,3 +67,13 @@
 - [x] Testes do sistema WebSocket (16 testes passando)
 - [ ] Integrar notificações automáticas de prazos (job agendado)
 - [ ] Integrar notificações de eventos (movimentações, documentos)
+
+
+## Correções de WebSocket (Bugs Fixados)
+- [x] Corrigir erro "websocket error" no cliente
+- [x] Implementar autenticação automática via socket.handshake.auth
+- [x] Adicionar tratamento de erros em todos os pontos críticos
+- [x] Implementar fallback para polling quando WebSocket falhar
+- [x] Adicionar timeout de conexão (15s)
+- [x] Melhorar logs de debug para diagnosticar problemas
+- [x] Testar todas as funcionalidades (38 testes passando)

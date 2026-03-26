@@ -73,6 +73,8 @@ export function useWebSocket() {
         updateStatus();
       } catch (error) {
         console.error("[useWebSocket] Failed to initialize:", error);
+        setIsInitialized(true);
+        updateStatus();
       }
     };
 

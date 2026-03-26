@@ -31,10 +31,11 @@ class WebSocketClient {
   private socket: Socket | null = null;
   private userId: number | null = null;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 10;
-  private reconnectDelay = 1000; // Start with 1 second
+  private maxReconnectAttempts = 5;
+  private reconnectDelay = 2000;
   private listeners: Map<string, Set<Function>> = new Map();
   private isConnecting = false;
+  private connectionTimeout: NodeJS.Timeout | null = null;
 
   /**
    * Initialize WebSocket connection
@@ -42,12 +43,13 @@ class WebSocketClient {
   public connect(userId: number, token: string): Promise<void> {
     return new Promise((resolve, reject) => {
       if (this.socket?.connected) {
+        console.log("[WebSocket] Already connected");
         resolve();
         return;
       }
 
       if (this.isConnecting) {
-        // Wait for existing connection attempt
+        console.log("[WebSocket] Connection already in progress");
         const checkConnection = setInterval(() => {
           if (this.socket?.connected) {
             clearInterval(checkConnection);
@@ -60,52 +62,65 @@ class WebSocketClient {
       this.isConnecting = true;
       this.userId = userId;
 
-      // Determine socket URL
-      const socketUrl = process.env.NODE_ENV === "development" 
-        ? "http://localhost:3000"
-        : window.location.origin;
+      try {
+        // Use current origin for WebSocket connection
+        const socketUrl = window.location.origin;
+        console.log("[WebSocket] Attempting connection to:", socketUrl);
 
-      this.socket = io(socketUrl, {
-        transports: ["websocket", "polling"],
-        reconnection: true,
-        reconnectionDelay: this.reconnectDelay,
-        reconnectionDelayMax: 5000,
-        reconnectionAttempts: this.maxReconnectAttempts,
-        auth: {
-          token,
-        },
-      });
+        this.socket = io(socketUrl, {
+          transports: ["websocket", "polling"],
+          reconnection: true,
+          reconnectionDelay: this.reconnectDelay,
+          reconnectionDelayMax: 10000,
+          reconnectionAttempts: this.maxReconnectAttempts,
+          auth: {
+            token,
+            userId,
+          },
+          autoConnect: true,
+          forceNew: false,
+        });
 
-      this.setupEventHandlers();
+        this.setupEventHandlers();
 
-      this.socket.on("connect", () => {
-        console.log("[WebSocket] Connected");
-        this.isConnecting = false;
-        this.reconnectAttempts = 0;
-        this.reconnectDelay = 1000;
+        // Set connection timeout
+        this.connectionTimeout = setTimeout(() => {
+          if (!this.socket?.connected) {
+            console.error("[WebSocket] Connection timeout");
+            this.isConnecting = false;
+            this.socket?.disconnect();
+            reject(new Error("WebSocket connection timeout"));
+          }
+        }, 15000);
 
-        // Authenticate with server
-        this.socket!.emit("authenticate", { userId, token });
-        resolve();
-      });
-
-      this.socket.on("connect_error", (error) => {
-        console.error("[WebSocket] Connection error:", error);
-        this.isConnecting = false;
-        reject(error);
-      });
-
-      this.socket.on("error", (error) => {
-        console.error("[WebSocket] Socket error:", error);
-      });
-
-      // Timeout after 10 seconds
-      setTimeout(() => {
-        if (this.isConnecting) {
+        this.socket.on("connect", () => {
+          console.log("[WebSocket] Connected successfully");
+          if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
           this.isConnecting = false;
-          reject(new Error("WebSocket connection timeout"));
-        }
-      }, 10000);
+          this.reconnectAttempts = 0;
+          this.reconnectDelay = 2000;
+
+          // Authenticate with server
+          this.socket!.emit("authenticate", { userId, token });
+          resolve();
+        });
+
+        this.socket.on("connect_error", (error: any) => {
+          console.error("[WebSocket] Connection error:", error);
+          if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
+          this.isConnecting = false;
+          reject(error);
+        });
+
+        this.socket.on("error", (error: any) => {
+          console.error("[WebSocket] Socket error:", error);
+        });
+      } catch (error) {
+        console.error("[WebSocket] Failed to initialize:", error);
+        this.isConnecting = false;
+        if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
+        reject(error);
+      }
     });
   }
 
@@ -115,48 +130,46 @@ class WebSocketClient {
   private setupEventHandlers(): void {
     if (!this.socket) return;
 
-    // Handle authentication
     this.socket.on("authenticated", (data) => {
       console.log("[WebSocket] Authenticated:", data);
       this.emit("authenticated", data);
     });
 
-    // Handle notifications
     this.socket.on("notification", (notification: WebSocketNotification) => {
       console.log("[WebSocket] Received notification:", notification);
       this.emit("notification", notification);
     });
 
-    // Handle case updates
     this.socket.on("case_update", (update: WebSocketCaseUpdate) => {
       console.log("[WebSocket] Received case update:", update);
       this.emit("case_update", update);
     });
 
-    // Handle deadline alerts
     this.socket.on("deadline_alert", (alert: WebSocketDeadlineAlert) => {
       console.log("[WebSocket] Received deadline alert:", alert);
       this.emit("deadline_alert", alert);
     });
 
-    // Handle disconnection
-    this.socket.on("disconnect", (reason) => {
+    this.socket.on("disconnect", (reason: string) => {
       console.log("[WebSocket] Disconnected:", reason);
       this.emit("disconnected", reason);
     });
 
-    // Handle reconnection attempts
     this.socket.on("reconnect_attempt", () => {
       this.reconnectAttempts++;
       console.log(`[WebSocket] Reconnection attempt ${this.reconnectAttempts}`);
       this.emit("reconnecting", this.reconnectAttempts);
     });
 
-    // Handle reconnection
     this.socket.on("reconnect", () => {
       console.log("[WebSocket] Reconnected");
       this.reconnectAttempts = 0;
       this.emit("reconnected", null);
+    });
+
+    this.socket.on("connect_error", (error: any) => {
+      console.error("[WebSocket] Connect error:", error);
+      this.emit("error", error);
     });
   }
 
@@ -220,6 +233,7 @@ class WebSocketClient {
    * Disconnect WebSocket
    */
   public disconnect(): void {
+    if (this.connectionTimeout) clearTimeout(this.connectionTimeout);
     if (this.socket) {
       this.socket.disconnect();
       this.socket = null;
@@ -234,6 +248,7 @@ class WebSocketClient {
    */
   public reconnect(): void {
     if (this.socket) {
+      console.log("[WebSocket] Manually reconnecting");
       this.socket.connect();
     }
   }

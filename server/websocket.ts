@@ -24,7 +24,11 @@ class WebSocketManager {
         credentials: true,
       },
       transports: ["websocket", "polling"],
+      pingInterval: 25000,
+      pingTimeout: 60000,
+      maxHttpBufferSize: 1e6,
     });
+    console.log("[WebSocket] Server initialized with CORS origin:", process.env.VITE_FRONTEND_URL || "*");
 
     this.setupEventHandlers();
     console.log("[WebSocket] Initialized");
@@ -41,9 +45,24 @@ class WebSocketManager {
     this.io.on("connection", (socket: Socket) => {
       console.log(`[WebSocket] Client connected: ${socket.id}`);
 
+      // Auto-authenticate from auth header
+      const auth = socket.handshake.auth;
+      if (auth?.userId) {
+        try {
+          this.handleAuthenticate(socket, { userId: auth.userId, token: auth.token || "" });
+        } catch (error) {
+          console.error(`[WebSocket] Auto-authentication error:`, error);
+        }
+      }
+
       // Handle user authentication
       socket.on("authenticate", (data: { userId: number; token: string }) => {
-        this.handleAuthenticate(socket, data);
+        try {
+          this.handleAuthenticate(socket, data);
+        } catch (error) {
+          console.error(`[WebSocket] Authentication error:`, error);
+          socket.emit("authentication_error", { message: "Authentication failed" });
+        }
       });
 
       // Handle disconnect
