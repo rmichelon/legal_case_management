@@ -11,6 +11,7 @@ import { nanoid } from "nanoid";
 import { NotificationService } from "./notificationService";
 import { wsManager } from "./websocket";
 import { googleCalendarRouter } from "./googleCalendarRouter";
+import { webhookRouter } from "./webhookRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -450,5 +451,6 @@ export const appRouter = router({
   }),
 
   googleCalendar: googleCalendarRouter,
+  webhook: webhookRouter,
 });
 export type AppRouter = typeof appRouter;

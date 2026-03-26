@@ -1,6 +1,6 @@
 import { eq, and, desc, like, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, InsertGoogleCalendarIntegration, InsertCalendarEvent } from "../drizzle/schema";
+import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -524,4 +524,170 @@ export async function deleteCalendarEvent(googleEventId: string): Promise<void> 
     console.error("[Database] Failed to delete calendar event:", error);
     throw error;
   }
+}
+
+
+// ============ WEBHOOK QUERIES ============
+
+export async function createWebhookSubscription(
+  data: InsertWebhookSubscription
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create webhook subscription: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(webhookSubscriptions).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to create webhook subscription:", error);
+    throw error;
+  }
+}
+
+export async function getWebhookSubscriptionByChannelId(channelId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(webhookSubscriptions)
+    .where(eq(webhookSubscriptions.channelId, channelId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getWebhookSubscriptionById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(webhookSubscriptions)
+    .where(eq(webhookSubscriptions.id, id))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function updateWebhookSubscription(
+  id: number,
+  data: Partial<InsertWebhookSubscription>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update webhook subscription: database not available");
+    return;
+  }
+
+  try {
+    await db.update(webhookSubscriptions).set(data).where(eq(webhookSubscriptions.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to update webhook subscription:", error);
+    throw error;
+  }
+}
+
+export async function getGoogleCalendarIntegrationById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(googleCalendarIntegrations)
+    .where(eq(googleCalendarIntegrations.id, id))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+// ============ SYNC HISTORY QUERIES ============
+
+export async function createSyncHistory(data: InsertSyncHistory): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create sync history: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(syncHistory).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to create sync history:", error);
+    throw error;
+  }
+}
+
+export async function getSyncHistoryByIntegration(integrationId: number, limit: number = 50) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(syncHistory)
+    .where(eq(syncHistory.integrationId, integrationId))
+    .orderBy(desc(syncHistory.createdAt))
+    .limit(limit);
+}
+
+// ============ SYNC CONFLICTS QUERIES ============
+
+export async function createSyncConflict(data: InsertSyncConflict): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create sync conflict: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(syncConflicts).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to create sync conflict:", error);
+    throw error;
+  }
+}
+
+export async function getUnresolvedConflicts(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db
+    .select()
+    .from(syncConflicts)
+    .where(and(eq(syncConflicts.userId, userId), eq(syncConflicts.status, "unresolved")))
+    .orderBy(desc(syncConflicts.createdAt));
+}
+
+export async function updateSyncConflict(
+  id: number,
+  data: Partial<InsertSyncConflict>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update sync conflict: database not available");
+    return;
+  }
+
+  try {
+    await db.update(syncConflicts).set(data).where(eq(syncConflicts.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to update sync conflict:", error);
+    throw error;
+  }
+}
+
+
+export async function getSyncConflictById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(syncConflicts)
+    .where(eq(syncConflicts.id, id))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
 }

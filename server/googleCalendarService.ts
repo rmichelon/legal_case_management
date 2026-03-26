@@ -160,6 +160,64 @@ export class GoogleCalendarService {
   }
 
   /**
+   * Watch calendar for changes via webhook
+   */
+  public async watchCalendar(
+    accessToken: string,
+    calendarId: string,
+    channel: { id: string; type: string; address: string }
+  ): Promise<any> {
+    try {
+      this.oauth2Client.setCredentials({ access_token: accessToken });
+
+      const response = await calendar.events.watch({
+        auth: this.oauth2Client,
+        calendarId,
+        requestBody: {
+          id: channel.id,
+          type: channel.type,
+          address: channel.address,
+        },
+      });
+
+      console.log("[GoogleCalendarService] Watch subscription created:", response.data.id);
+      return response.data;
+    } catch (error) {
+      console.error("[GoogleCalendarService] Failed to watch calendar:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * List recently modified events from Google Calendar
+   */
+  public async listRecentlyModifiedEvents(
+    accessToken: string,
+    calendarId: string,
+    maxResults: number = 10
+  ): Promise<any[]> {
+    try {
+      this.oauth2Client.setCredentials({ access_token: accessToken });
+
+      const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+
+      const response = await calendar.events.list({
+        auth: this.oauth2Client,
+        calendarId,
+        maxResults,
+        orderBy: "updated",
+        showDeleted: true,
+        updatedMin: oneHourAgo,
+      });
+
+      return response.data.items || [];
+    } catch (error) {
+      console.error("[GoogleCalendarService] Failed to list recently modified events:", error);
+      throw error;
+    }
+  }
+
+  /**
    * List upcoming events from Google Calendar
    */
   public async listUpcomingEvents(

@@ -244,3 +244,73 @@ export const calendarEvents = mysqlTable("calendarEvents", {
 
 export type CalendarEvent = typeof calendarEvents.$inferSelect;
 export type InsertCalendarEvent = typeof calendarEvents.$inferInsert;
+
+
+/**
+ * Webhook subscriptions table - tracks active webhooks for Google Calendar
+ */
+export const webhookSubscriptions = mysqlTable("webhookSubscriptions", {
+  id: int("id").autoincrement().primaryKey(),
+  integrationId: int("integrationId").notNull(),
+  userId: int("userId").notNull(),
+  calendarId: varchar("calendarId", { length: 255 }).notNull(),
+  resourceId: varchar("resourceId", { length: 255 }).notNull().unique(),
+  channelId: varchar("channelId", { length: 255 }).notNull().unique(),
+  expiration: timestamp("expiration").notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  lastNotificationAt: timestamp("lastNotificationAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type WebhookSubscription = typeof webhookSubscriptions.$inferSelect;
+export type InsertWebhookSubscription = typeof webhookSubscriptions.$inferInsert;
+
+/**
+ * Sync history table - tracks all synchronization events between Google Calendar and system
+ */
+export const syncHistory = mysqlTable("syncHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  integrationId: int("integrationId").notNull(),
+  userId: int("userId").notNull(),
+  eventType: mysqlEnum("eventType", ["created", "updated", "deleted"]).notNull(),
+  sourceSystem: mysqlEnum("sourceSystem", ["google_calendar", "legal_system"]).notNull(),
+  googleEventId: varchar("googleEventId", { length: 255 }),
+  caseId: int("caseId"),
+  deadlineId: int("deadlineId"),
+  status: mysqlEnum("status", ["success", "failed", "conflict", "skipped"]).default("success").notNull(),
+  conflictType: mysqlEnum("conflictType", ["none", "modified_both", "deleted_both", "timestamp_mismatch"]),
+  conflictResolution: mysqlEnum("conflictResolution", ["keep_google", "keep_system", "manual"]),
+  errorMessage: text("errorMessage"),
+  metadata: text("metadata"), // JSON string with additional details
+  syncedAt: timestamp("syncedAt").defaultNow().notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type SyncHistory = typeof syncHistory.$inferSelect;
+export type InsertSyncHistory = typeof syncHistory.$inferInsert;
+
+/**
+ * Sync conflicts table - stores unresolved conflicts for manual review
+ */
+export const syncConflicts = mysqlTable("syncConflicts", {
+  id: int("id").autoincrement().primaryKey(),
+  integrationId: int("integrationId").notNull(),
+  userId: int("userId").notNull(),
+  googleEventId: varchar("googleEventId", { length: 255 }).notNull(),
+  caseId: int("caseId"),
+  deadlineId: int("deadlineId"),
+  conflictType: mysqlEnum("conflictType", ["modified_both", "deleted_both", "timestamp_mismatch", "data_mismatch"]).notNull(),
+  googleData: text("googleData").notNull(), // JSON string
+  systemData: text("systemData").notNull(), // JSON string
+  status: mysqlEnum("status", ["unresolved", "resolved", "ignored"]).default("unresolved").notNull(),
+  resolution: mysqlEnum("resolution", ["keep_google", "keep_system", "merge", "manual"]),
+  resolvedBy: int("resolvedBy"), // userId who resolved
+  resolvedAt: timestamp("resolvedAt"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type SyncConflict = typeof syncConflicts.$inferSelect;
+export type InsertSyncConflict = typeof syncConflicts.$inferInsert;

@@ -91,3 +91,16 @@
 - [x] Testes de integração com Google Calendar (6 testes passando)
 - [x] Tratamento de erros de sincronização
 - [x] Link de Agenda adicionado à navegação
+
+
+## Webhook para Sincronizacao Bidirecional (Nova Feature)
+- [x] Criar schema de webhook e historico de sincronizacao
+- [x] Implementar Google Calendar Watch API
+- [x] Criar WebhookHandler para processar notificacoes
+- [x] Implementar sincronizacao bidirecional com tratamento de conflitos
+- [x] Criar procedures tRPC para gerenciar webhooks
+- [x] Adicionar sistema de resolucao de conflitos
+- [x] Testes do sistema de webhook (3 testes passando)
+- [ ] Criar endpoint Express para receber webhooks
+- [ ] Adicionar validacao de seguranca (HMAC, tokens)
+- [ ] Implementar retry logic para sincronizacoes falhadas
