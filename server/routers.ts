@@ -361,6 +361,72 @@ export const appRouter = router({
         return await db.getChatHistoryByUserId(ctx.user.id, input.limit);
       }),
   }),
+
+  // ============ NOTIFICATIONS ROUTER ============
+  notifications: router({
+    list: protectedProcedure
+      .input(z.object({ limit: z.number().default(20) }))
+      .query(async ({ ctx, input }) => {
+        return await db.getNotificationsByUserId(ctx.user.id, input.limit);
+      }),
+
+    unread: protectedProcedure.query(async ({ ctx }) => {
+      return await db.getUnreadNotificationsByUserId(ctx.user.id);
+    }),
+
+    markAsRead: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.markNotificationAsRead(input.id);
+        return { success: true };
+      }),
+
+    markAllAsRead: protectedProcedure.mutation(async ({ ctx }) => {
+      await db.markAllNotificationsAsRead(ctx.user.id);
+      return { success: true };
+    }),
+
+    delete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        await db.deleteNotification(input.id);
+        return { success: true };
+      }),
+
+    getPreferences: protectedProcedure.query(async ({ ctx }) => {
+      let prefs = await db.getNotificationPreferencesByUserId(ctx.user.id);
+      if (!prefs) {
+        // Create default preferences if not exists
+        await db.createNotificationPreferences({
+          userId: ctx.user.id,
+          deadlineAlerts: true,
+          caseUpdates: true,
+          newMovements: true,
+          documentUploads: true,
+          emailNotifications: true,
+          pushNotifications: true,
+          daysBeforeDeadline: 3,
+        });
+        prefs = await db.getNotificationPreferencesByUserId(ctx.user.id);
+      }
+      return prefs;
+    }),
+
+    updatePreferences: protectedProcedure
+      .input(z.object({
+        deadlineAlerts: z.boolean().optional(),
+        caseUpdates: z.boolean().optional(),
+        newMovements: z.boolean().optional(),
+        documentUploads: z.boolean().optional(),
+        emailNotifications: z.boolean().optional(),
+        pushNotifications: z.boolean().optional(),
+        daysBeforeDeadline: z.number().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        await db.updateNotificationPreferences(ctx.user.id, input);
+        return { success: true };
+      }),
+  }),
 });
 
 export type AppRouter = typeof appRouter;

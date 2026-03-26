@@ -2,7 +2,8 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { FileText, Search, MessageSquare, Users, LogOut } from "lucide-react";
+import { FileText, Search, MessageSquare, Users, LogOut, Bell } from "lucide-react";
+import NotificationBell from "./NotificationBell";
 
 export default function Navigation() {
   const { isAuthenticated, logout } = useAuth();
@@ -61,17 +62,29 @@ export default function Navigation() {
               <Users className="w-4 h-4" />
               Clientes
             </Button>
+
+            <Button
+              variant={isActive("/notifications") ? "default" : "ghost"}
+              onClick={() => navigate("/notifications")}
+              className="gap-2"
+            >
+              <Bell className="w-4 h-4" />
+              Notificações
+            </Button>
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => logout()}
-          className="gap-2"
-        >
-          <LogOut className="w-4 h-4" />
-          Sair
-        </Button>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Button
+            variant="outline"
+            onClick={() => logout()}
+            className="gap-2"
+          >
+            <LogOut className="w-4 h-4" />
+            Sair
+          </Button>
+        </div>
       </div>
     </nav>
   );

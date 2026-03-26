@@ -41,3 +41,15 @@
 - [x] Revisar e testar todas as funcionalidades
 - [x] Criar checkpoint final
 - [x] Publicar sistema
+
+## Notificações em Tempo Real (Nova Feature)
+- [x] Criar schema de notificações no banco de dados
+- [x] Implementar procedures tRPC para notificações
+- [x] Criar Centro de Notificações no frontend
+- [x] Implementar painel de preferências de notificações
+- [x] Adicionar widget de notificações em tempo real na navegação
+- [x] Criar sistema de histórico de notificações
+- [x] Testes do sistema de notificações (7 testes passando)
+- [ ] Configurar servidor WebSocket para notificações push
+- [ ] Implementar Push Notifications nativas do navegador
+- [ ] Integração com prazos e eventos (criar notificações automáticas)

@@ -156,3 +156,45 @@ export const emailAlerts = mysqlTable("emailAlerts", {
 
 export type EmailAlert = typeof emailAlerts.$inferSelect;
 export type InsertEmailAlert = typeof emailAlerts.$inferInsert;
+
+/**
+ * Notifications table - stores real-time notifications for users
+ */
+export const notifications = mysqlTable("notifications", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  caseId: int("caseId"),
+  deadlineId: int("deadlineId"),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message").notNull(),
+  type: mysqlEnum("type", ["deadline_alert", "case_update", "new_movement", "document_uploaded", "system"]).notNull(),
+  priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  read: boolean("read").default(false).notNull(),
+  readAt: timestamp("readAt"),
+  actionUrl: varchar("actionUrl", { length: 500 }),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = typeof notifications.$inferInsert;
+
+/**
+ * Notification preferences table - stores user preferences for notifications
+ */
+export const notificationPreferences = mysqlTable("notificationPreferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull().unique(),
+  deadlineAlerts: boolean("deadlineAlerts").default(true).notNull(),
+  caseUpdates: boolean("caseUpdates").default(true).notNull(),
+  newMovements: boolean("newMovements").default(true).notNull(),
+  documentUploads: boolean("documentUploads").default(true).notNull(),
+  emailNotifications: boolean("emailNotifications").default(true).notNull(),
+  pushNotifications: boolean("pushNotifications").default(true).notNull(),
+  daysBeforeDeadline: int("daysBeforeDeadline").default(3).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type NotificationPreference = typeof notificationPreferences.$inferSelect;
+export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
