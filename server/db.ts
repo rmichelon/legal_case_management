@@ -1,6 +1,6 @@
 import { eq, and, desc, like, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences } from "../drizzle/schema";
+import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, InsertGoogleCalendarIntegration, InsertCalendarEvent } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -399,4 +399,129 @@ export async function updateNotificationPreferences(userId: number, data: Partia
   if (!db) throw new Error("Database not available");
 
   return await db.update(notificationPreferences).set(data).where(eq(notificationPreferences.userId, userId));
+}
+
+
+// ============ GOOGLE CALENDAR INTEGRATION QUERIES ============
+
+export async function getGoogleCalendarIntegration(userId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(googleCalendarIntegrations)
+    .where(eq(googleCalendarIntegrations.userId, userId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createGoogleCalendarIntegration(
+  data: InsertGoogleCalendarIntegration
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create integration: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(googleCalendarIntegrations).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to create integration:", error);
+    throw error;
+  }
+}
+
+export async function updateGoogleCalendarIntegration(
+  userId: number,
+  data: Partial<InsertGoogleCalendarIntegration>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update integration: database not available");
+    return;
+  }
+
+  try {
+    await db
+      .update(googleCalendarIntegrations)
+      .set(data)
+      .where(eq(googleCalendarIntegrations.userId, userId));
+  } catch (error) {
+    console.error("[Database] Failed to update integration:", error);
+    throw error;
+  }
+}
+
+export async function createCalendarEvent(data: InsertCalendarEvent): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create calendar event: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(calendarEvents).values(data);
+  } catch (error) {
+    console.error("[Database] Failed to create calendar event:", error);
+    throw error;
+  }
+}
+
+export async function getCalendarEventByGoogleId(googleEventId: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(calendarEvents)
+    .where(eq(calendarEvents.googleEventId, googleEventId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getCaseCalendarEvents(caseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(calendarEvents).where(eq(calendarEvents.caseId, caseId));
+}
+
+export async function updateCalendarEvent(
+  googleEventId: string,
+  data: Partial<InsertCalendarEvent>
+): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update calendar event: database not available");
+    return;
+  }
+
+  try {
+    await db
+      .update(calendarEvents)
+      .set(data)
+      .where(eq(calendarEvents.googleEventId, googleEventId));
+  } catch (error) {
+    console.error("[Database] Failed to update calendar event:", error);
+    throw error;
+  }
+}
+
+export async function deleteCalendarEvent(googleEventId: string): Promise<void> {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot delete calendar event: database not available");
+    return;
+  }
+
+  try {
+    await db.delete(calendarEvents).where(eq(calendarEvents.googleEventId, googleEventId));
+  } catch (error) {
+    console.error("[Database] Failed to delete calendar event:", error);
+    throw error;
+  }
 }

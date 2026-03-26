@@ -77,3 +77,17 @@
 - [x] Adicionar timeout de conexão (15s)
 - [x] Melhorar logs de debug para diagnosticar problemas
 - [x] Testar todas as funcionalidades (38 testes passando)
+
+
+## Integração com Google Calendar (Nova Feature)
+- [x] Configurar Google Calendar API e credenciais
+- [x] Implementar autenticação OAuth 2.0 com Google
+- [x] Criar schema de integração (googleCalendarIntegration, calendarEvents)
+- [x] Criar procedures tRPC para sincronização
+- [x] Implementar sincronização de prazos para Google Calendar
+- [x] Criar página de Agenda com visualização de eventos
+- [x] Implementar controle de sincronização por tipo de prazo
+- [x] Adicionar preferências de sincronização do usuário
+- [x] Testes de integração com Google Calendar (6 testes passando)
+- [x] Tratamento de erros de sincronização
+- [x] Link de Agenda adicionado à navegação

@@ -10,6 +10,7 @@ import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
 import { NotificationService } from "./notificationService";
 import { wsManager } from "./websocket";
+import { googleCalendarRouter } from "./googleCalendarRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -445,8 +446,9 @@ export const appRouter = router({
       }))
       .mutation(async ({ ctx, input }) => {
         return await NotificationService.createAndBroadcast(ctx.user.id, input);
-      }),
+       }),
   }),
-});
 
+  googleCalendar: googleCalendarRouter,
+});
 export type AppRouter = typeof appRouter;

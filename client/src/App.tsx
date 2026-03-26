@@ -13,6 +13,7 @@ import Clients from "./pages/Clients";
 import SearchCases from "./pages/SearchCases";
 import ChatBot from "./pages/ChatBot";
 import Notifications from "./pages/Notifications";
+import Calendar from "./pages/Calendar";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -29,6 +30,7 @@ function Router() {
         <Route path="/chat" component={ChatBot} />
         <Route path="/clients" component={Clients} />
         <Route path="/notifications" component={Notifications} />
+        <Route path="/calendar" component={Calendar} />
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />

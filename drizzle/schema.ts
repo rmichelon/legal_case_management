@@ -198,3 +198,49 @@ export const notificationPreferences = mysqlTable("notificationPreferences", {
 
 export type NotificationPreference = typeof notificationPreferences.$inferSelect;
 export type InsertNotificationPreference = typeof notificationPreferences.$inferInsert;
+
+
+/**
+ * Google Calendar Integration Tables
+ */
+export const googleCalendarIntegrations = mysqlTable("googleCalendarIntegrations", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  googleAccountEmail: varchar("googleAccountEmail", { length: 320 }).notNull(),
+  accessToken: text("accessToken").notNull(),
+  refreshToken: text("refreshToken"),
+  tokenExpiresAt: timestamp("tokenExpiresAt"),
+  calendarId: varchar("calendarId", { length: 255 }).notNull(),
+  isActive: boolean("isActive").default(true).notNull(),
+  syncDeadlines: boolean("syncDeadlines").default(true).notNull(),
+  syncMovements: boolean("syncMovements").default(true).notNull(),
+  syncHearings: boolean("syncHearings").default(true).notNull(),
+  lastSyncAt: timestamp("lastSyncAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type GoogleCalendarIntegration = typeof googleCalendarIntegrations.$inferSelect;
+export type InsertGoogleCalendarIntegration = typeof googleCalendarIntegrations.$inferInsert;
+
+export const calendarEvents = mysqlTable("calendarEvents", {
+  id: int("id").autoincrement().primaryKey(),
+  integrationId: int("integrationId").notNull(),
+  caseId: int("caseId").notNull(),
+  deadlineId: int("deadlineId"),
+  googleEventId: varchar("googleEventId", { length: 255 }).notNull().unique(),
+  eventType: mysqlEnum("eventType", ["deadline", "movement", "hearing", "other"]).notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  startTime: timestamp("startTime").notNull(),
+  endTime: timestamp("endTime"),
+  location: varchar("location", { length: 500 }),
+  isAllDay: boolean("isAllDay").default(false).notNull(),
+  syncedAt: timestamp("syncedAt").defaultNow().notNull(),
+  lastModifiedAt: timestamp("lastModifiedAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CalendarEvent = typeof calendarEvents.$inferSelect;
+export type InsertCalendarEvent = typeof calendarEvents.$inferInsert;
