@@ -53,3 +53,17 @@
 - [ ] Configurar servidor WebSocket para notificações push
 - [ ] Implementar Push Notifications nativas do navegador
 - [ ] Integração com prazos e eventos (criar notificações automáticas)
+
+## WebSockets com Socket.io (Nova Feature)
+- [x] Instalar Socket.io e dependências
+- [x] Configurar servidor WebSocket no Express
+- [x] Criar gerenciador de conexões de usuários
+- [x] Implementar sistema de broadcast de notificações
+- [x] Criar cliente WebSocket no frontend
+- [x] Implementar reconexão automática
+- [x] Criar NotificationService para envio de notificações
+- [x] Integrar WebSocket ao NotificationBell
+- [x] Adicionar indicador visual de status (conectado/offline)
+- [x] Testes do sistema WebSocket (16 testes passando)
+- [ ] Integrar notificações automáticas de prazos (job agendado)
+- [ ] Integrar notificações de eventos (movimentações, documentos)

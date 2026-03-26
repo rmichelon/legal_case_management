@@ -8,6 +8,8 @@ import { TRPCError } from "@trpc/server";
 import { invokeLLM } from "./_core/llm";
 import { storagePut } from "./storage";
 import { nanoid } from "nanoid";
+import { NotificationService } from "./notificationService";
+import { wsManager } from "./websocket";
 
 export const appRouter = router({
   system: systemRouter,
@@ -425,6 +427,24 @@ export const appRouter = router({
       .mutation(async ({ ctx, input }) => {
         await db.updateNotificationPreferences(ctx.user.id, input);
         return { success: true };
+      }),
+
+    getWebSocketStatus: protectedProcedure.query(async ({ ctx }) => {
+      return {
+        connected: NotificationService.isUserConnected(ctx.user.id),
+        connectedUsers: NotificationService.getConnectedUsersCount(),
+      };
+    }),
+
+    testNotification: protectedProcedure
+      .input(z.object({
+        title: z.string(),
+        message: z.string(),
+        type: z.enum(["deadline_alert", "case_update", "new_movement", "document_uploaded", "system"]),
+        priority: z.enum(["low", "medium", "high", "urgent"]),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        return await NotificationService.createAndBroadcast(ctx.user.id, input);
       }),
   }),
 });

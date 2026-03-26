@@ -12,21 +12,33 @@ import { Bell, ArrowRight } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { useAuth } from "@/_core/hooks/useAuth";
+import { useWebSocket } from "@/hooks/useWebSocket";
 
 export default function NotificationBell() {
   const { isAuthenticated } = useAuth();
   const [, navigate] = useLocation();
   const [open, setOpen] = useState(false);
+  const { status: wsStatus, on, off } = useWebSocket();
 
-  const { data: unreadNotifications = [] } = trpc.notifications.unread.useQuery(undefined, {
+  const { data: unreadNotifications = [], refetch: refetchUnread } = trpc.notifications.unread.useQuery(undefined, {
     enabled: isAuthenticated,
-    refetchInterval: 5000, // Poll every 5 seconds
+    refetchInterval: wsStatus.connected ? 0 : 5000,
   });
 
-  const { data: recentNotifications = [] } = trpc.notifications.list.useQuery(
+  const { data: recentNotifications = [], refetch: refetchRecent } = trpc.notifications.list.useQuery(
     { limit: 5 },
-    { enabled: isAuthenticated && open, refetchInterval: 3000 }
+    { enabled: isAuthenticated && open, refetchInterval: wsStatus.connected ? 0 : 3000 }
   );
+
+  useEffect(() => {
+    if (!wsStatus.connected) return;
+    const handleNotification = () => {
+      refetchUnread();
+      refetchRecent();
+    };
+    on("notification", handleNotification);
+    return () => off("notification", handleNotification);
+  }, [wsStatus.connected, on, off, refetchUnread, refetchRecent]);
 
   const markAsReadMutation = trpc.notifications.markAsRead.useMutation();
 
@@ -56,6 +68,7 @@ export default function NotificationBell() {
   };
 
   const unreadCount = (unreadNotifications as any[])?.length ?? 0;
+  const showOfflineIndicator = isAuthenticated && !wsStatus.connected;
 
   if (!isAuthenticated) {
     return null;
@@ -68,9 +81,9 @@ export default function NotificationBell() {
           variant="ghost"
           size="icon"
           className="relative"
-          title="Notificações"
+          title={wsStatus.connected ? "Notificações (conectado)" : "Notificações (offline)"}
         >
-          <Bell className="w-5 h-5" />
+          <Bell className={`w-5 h-5 ${showOfflineIndicator ? "opacity-50" : ""}`} />
           {unreadCount > 0 && (
             <Badge
               className="absolute -top-2 -right-2 h-5 w-5 flex items-center justify-center p-0 bg-accent text-accent-foreground text-xs font-bold"
@@ -78,6 +91,9 @@ export default function NotificationBell() {
             >
               {unreadCount > 9 ? "9+" : unreadCount}
             </Badge>
+          )}
+          {showOfflineIndicator && (
+            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-yellow-500 rounded-full" />
           )}
         </Button>
       </PopoverTrigger>
