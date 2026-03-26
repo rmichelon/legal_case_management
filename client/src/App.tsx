@@ -16,6 +16,7 @@ import Notifications from "./pages/Notifications";
 import Calendar from "./pages/Calendar";
 import CaseDetailPage from "./pages/CaseDetailPage";
 import MonitoringDashboard from "./pages/MonitoringDashboard";
+import ReportsPage from "./pages/ReportsPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -35,6 +36,7 @@ function Router() {
         <Route path="/notifications" component={Notifications} />
         <Route path="/calendar" component={Calendar} />
         <Route path="/monitoring" component={MonitoringDashboard} />
+        <Route path="/reports" component={ReportsPage} />
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />

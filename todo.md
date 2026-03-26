@@ -127,3 +127,13 @@
 - [x] Log de auditoria visual
 - [ ] Gerenciador de configurações de tribunal
 - [ ] Testes das telas
+
+
+## Exportação de Relatórios em PDF (Nova Feature)
+- [ ] Criar serviço de geração de relatórios
+- [ ] Implementar geração de PDF com ReportLab
+- [ ] Adicionar gráficos de uptime e taxa de sucesso
+- [ ] Criar procedures tRPC para exportação
+- [ ] Desenvolver página de Relatórios
+- [ ] Implementar agendamento de relatórios por email
+- [ ] Testes da funcionalidade de exportação
