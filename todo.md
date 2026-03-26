@@ -104,3 +104,16 @@
 - [ ] Criar endpoint Express para receber webhooks
 - [ ] Adicionar validacao de seguranca (HMAC, tokens)
 - [ ] Implementar retry logic para sincronizacoes falhadas
+
+
+## Módulo de Gestão de Processos (Nova Feature)
+- [x] Criar schema para integração com tribunal (courtData, tribunalSync)
+- [x] Criar schema para histórico de interações (caseInteractions, auditLog)
+- [x] Implementar serviço de integração com webservice do tribunal
+- [x] Criar procedures tRPC para sincronizar dados do tribunal
+- [x] Criar procedures tRPC para atualizar processos
+- [ ] Desenvolver interface de edição avançada de processos
+- [ ] Implementar histórico de interações e auditoria
+- [ ] Adicionar campos específicos do tribunal (vara, juiz, status)
+- [ ] Criar sistema de sincronização em tempo real
+- [ ] Testes do módulo de gestão de processos

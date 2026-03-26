@@ -1,6 +1,6 @@
 import { eq, and, desc, like, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict } from "../drizzle/schema";
+import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, courtData, tribunalSyncConfig, caseInteractions, auditLog, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict, InsertCourtData, InsertTribunalSyncConfig, InsertCaseInteraction, InsertAuditLog } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -690,4 +690,164 @@ export async function getSyncConflictById(id: number) {
     .limit(1);
 
   return result.length > 0 ? result[0] : undefined;
+}
+
+
+// Tribunal and court data queries
+export async function getCourtDataByCase(caseId: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(courtData)
+    .where(eq(courtData.caseId, caseId))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createOrUpdateCourtData(data: InsertCourtData) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create court data: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(courtData).values(data).onDuplicateKeyUpdate({
+      set: {
+        courtName: data.courtName,
+        vara: data.vara,
+        judge: data.judge,
+        processStatus: data.processStatus,
+        lastMovement: data.lastMovement,
+        lastMovementDate: data.lastMovementDate,
+        plaintiff: data.plaintiff,
+        defendant: data.defendant,
+        nextHearingDate: data.nextHearingDate,
+        lastSyncAt: new Date(),
+        syncStatus: data.syncStatus,
+        updatedAt: new Date(),
+      },
+    });
+  } catch (error) {
+    console.error("[Database] Failed to create/update court data:", error);
+    throw error;
+  }
+}
+
+export async function getTribunalSyncConfig(userId: number, tribunalCode: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(tribunalSyncConfig)
+    .where(and(eq(tribunalSyncConfig.userId, userId), eq(tribunalSyncConfig.tribunalCode, tribunalCode)))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createTribunalSyncConfig(config: InsertTribunalSyncConfig) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create tribunal sync config: database not available");
+    return;
+  }
+
+  try {
+    const result = await db.insert(tribunalSyncConfig).values(config);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create tribunal sync config:", error);
+    throw error;
+  }
+}
+
+export async function updateTribunalSyncConfig(id: number, updates: Partial<InsertTribunalSyncConfig>) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot update tribunal sync config: database not available");
+    return;
+  }
+
+  try {
+    await db.update(tribunalSyncConfig).set(updates).where(eq(tribunalSyncConfig.id, id));
+  } catch (error) {
+    console.error("[Database] Failed to update tribunal sync config:", error);
+    throw error;
+  }
+}
+
+// Case interactions
+export async function createCaseInteraction(interaction: InsertCaseInteraction) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create case interaction: database not available");
+    return;
+  }
+
+  try {
+    const result = await db.insert(caseInteractions).values(interaction);
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to create case interaction:", error);
+    throw error;
+  }
+}
+
+export async function getCaseInteractionsByCaseId(caseId: number, limit: number = 50) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db
+      .select()
+      .from(caseInteractions)
+      .where(eq(caseInteractions.caseId, caseId))
+      .orderBy(desc(caseInteractions.createdAt))
+      .limit(limit);
+
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get case interactions:", error);
+    return [];
+  }
+}
+
+// Audit log
+export async function createAuditLog(log: InsertAuditLog) {
+  const db = await getDb();
+  if (!db) {
+    console.warn("[Database] Cannot create audit log: database not available");
+    return;
+  }
+
+  try {
+    await db.insert(auditLog).values(log);
+  } catch (error) {
+    console.error("[Database] Failed to create audit log:", error);
+    throw error;
+  }
+}
+
+export async function getAuditLogByCaseId(caseId: number, limit: number = 100) {
+  const db = await getDb();
+  if (!db) return [];
+
+  try {
+    const result = await db
+      .select()
+      .from(auditLog)
+      .where(eq(auditLog.caseId, caseId))
+      .orderBy(desc(auditLog.createdAt))
+      .limit(limit);
+
+    return result;
+  } catch (error) {
+    console.error("[Database] Failed to get audit log:", error);
+    return [];
+  }
 }

@@ -314,3 +314,147 @@ export const syncConflicts = mysqlTable("syncConflicts", {
 
 export type SyncConflict = typeof syncConflicts.$inferSelect;
 export type InsertSyncConflict = typeof syncConflicts.$inferInsert;
+
+
+/**
+ * Court data table - stores information synchronized from court/tribunal webservices
+ */
+export const courtData = mysqlTable("courtData", {
+  id: int("id").autoincrement().primaryKey(),
+  caseId: int("caseId").notNull(),
+  userId: int("userId").notNull(),
+  // Court identification
+  courtName: varchar("courtName", { length: 255 }),
+  courtCode: varchar("courtCode", { length: 50 }),
+  vara: varchar("vara", { length: 100 }),
+  judge: varchar("judge", { length: 255 }),
+  // Case status and details
+  processStatus: mysqlEnum("processStatus", [
+    "pending",
+    "active",
+    "suspended",
+    "archived",
+    "closed",
+    "appealed",
+    "unknown",
+  ]).default("unknown").notNull(),
+  lastMovement: text("lastMovement"),
+  lastMovementDate: timestamp("lastMovementDate"),
+  // Parties and representatives
+  plaintiff: text("plaintiff"),
+  defendant: text("defendant"),
+  plaintiffLawyer: varchar("plaintiffLawyer", { length: 255 }),
+  defendantLawyer: varchar("defendantLawyer", { length: 255 }),
+  // Hearing information
+  nextHearingDate: timestamp("nextHearingDate"),
+  nextHearingLocation: varchar("nextHearingLocation", { length: 500 }),
+  nextHearingType: varchar("nextHearingType", { length: 100 }),
+  // Additional data
+  courtMetadata: text("courtMetadata"), // JSON with additional court-specific data
+  externalId: varchar("externalId", { length: 255 }).unique(), // ID from tribunal system
+  // Sync tracking
+  lastSyncAt: timestamp("lastSyncAt"),
+  syncStatus: mysqlEnum("syncStatus", ["synced", "pending", "failed", "manual"]).default("manual").notNull(),
+  syncErrorMessage: text("syncErrorMessage"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CourtData = typeof courtData.$inferSelect;
+export type InsertCourtData = typeof courtData.$inferInsert;
+
+/**
+ * Tribunal sync configuration - stores credentials and settings for tribunal webservice integration
+ */
+export const tribunalSyncConfig = mysqlTable("tribunalSyncConfig", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  // Tribunal identification
+  tribunalName: varchar("tribunalName", { length: 255 }).notNull(),
+  tribunalCode: varchar("tribunalCode", { length: 50 }).notNull(),
+  // API configuration
+  apiUrl: varchar("apiUrl", { length: 500 }).notNull(),
+  apiKey: varchar("apiKey", { length: 255 }), // Encrypted
+  apiSecret: varchar("apiSecret", { length: 255 }), // Encrypted
+  authMethod: mysqlEnum("authMethod", ["api_key", "oauth", "basic_auth", "custom"]).default("api_key").notNull(),
+  // Sync settings
+  isEnabled: boolean("isEnabled").default(true).notNull(),
+  autoSyncEnabled: boolean("autoSyncEnabled").default(true).notNull(),
+  syncIntervalMinutes: int("syncIntervalMinutes").default(360).notNull(), // Default 6 hours
+  lastSyncAt: timestamp("lastSyncAt"),
+  nextSyncAt: timestamp("nextSyncAt"),
+  // Error tracking
+  lastErrorAt: timestamp("lastErrorAt"),
+  lastErrorMessage: text("lastErrorMessage"),
+  consecutiveFailures: int("consecutiveFailures").default(0).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type TribunalSyncConfig = typeof tribunalSyncConfig.$inferSelect;
+export type InsertTribunalSyncConfig = typeof tribunalSyncConfig.$inferInsert;
+
+/**
+ * Case interactions table - tracks all interactions and updates to a case
+ */
+export const caseInteractions = mysqlTable("caseInteractions", {
+  id: int("id").autoincrement().primaryKey(),
+  caseId: int("caseId").notNull(),
+  userId: int("userId").notNull(),
+  // Interaction details
+  type: mysqlEnum("type", [
+    "status_change",
+    "deadline_added",
+    "deadline_updated",
+    "deadline_removed",
+    "movement_added",
+    "document_uploaded",
+    "note_added",
+    "client_contacted",
+    "court_contacted",
+    "hearing_scheduled",
+    "hearing_completed",
+    "appeal_filed",
+    "settlement_proposed",
+    "other",
+  ]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  description: text("description"),
+  // Related entities
+  relatedDeadlineId: int("relatedDeadlineId"),
+  relatedMovementId: int("relatedMovementId"),
+  relatedDocumentId: int("relatedDocumentId"),
+  // Metadata
+  metadata: text("metadata"), // JSON with additional details
+  attachments: text("attachments"), // JSON array of file URLs
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CaseInteraction = typeof caseInteractions.$inferSelect;
+export type InsertCaseInteraction = typeof caseInteractions.$inferInsert;
+
+/**
+ * Audit log table - tracks all changes to cases for compliance and audit purposes
+ */
+export const auditLog = mysqlTable("auditLog", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  caseId: int("caseId"),
+  // Action details
+  action: varchar("action", { length: 100 }).notNull(), // e.g., "case_created", "case_updated", "document_uploaded"
+  entityType: varchar("entityType", { length: 50 }).notNull(), // e.g., "case", "deadline", "document"
+  entityId: int("entityId").notNull(),
+  // Changes
+  oldValues: text("oldValues"), // JSON with previous values
+  newValues: text("newValues"), // JSON with new values
+  changedFields: text("changedFields"), // JSON array of field names that changed
+  // Context
+  ipAddress: varchar("ipAddress", { length: 45 }),
+  userAgent: text("userAgent"),
+  metadata: text("metadata"), // JSON with additional context
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AuditLog = typeof auditLog.$inferSelect;
+export type InsertAuditLog = typeof auditLog.$inferInsert;
