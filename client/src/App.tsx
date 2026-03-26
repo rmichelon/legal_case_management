@@ -14,6 +14,7 @@ import SearchCases from "./pages/SearchCases";
 import ChatBot from "./pages/ChatBot";
 import Notifications from "./pages/Notifications";
 import Calendar from "./pages/Calendar";
+import CaseDetailPage from "./pages/CaseDetailPage";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -26,6 +27,7 @@ function Router() {
         <Route path="/cases/new" component={() => <CaseForm caseId={undefined} />} />
         <Route path="/cases/:id/edit" component={(props: any) => <CaseForm caseId={props.id} />} />
         <Route path="/cases/:id" component={(props: any) => <CaseDetail caseId={props.id} />} />
+        <Route path="/case-detail/:caseId" component={(props: any) => <CaseDetailPage />} />
         <Route path="/search" component={SearchCases} />
         <Route path="/chat" component={ChatBot} />
         <Route path="/clients" component={Clients} />

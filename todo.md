@@ -117,3 +117,13 @@
 - [ ] Adicionar campos específicos do tribunal (vara, juiz, status)
 - [ ] Criar sistema de sincronização em tempo real
 - [ ] Testes do módulo de gestão de processos
+
+
+## Telas do Sistema de Gestão de Processos (Nova Feature)
+- [x] Página de detalhes do processo com abas (Informações, Tribunal, Histórico, Auditoria)
+- [x] Formulário de edição avançada de processos
+- [x] Painel de sincronização com tribunal
+- [x] Timeline de histórico de interações
+- [x] Log de auditoria visual
+- [ ] Gerenciador de configurações de tribunal
+- [ ] Testes das telas
