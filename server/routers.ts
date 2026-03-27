@@ -16,11 +16,13 @@ import { caseManagementRouter } from "./caseManagementRouter";
 import { monitoringRouter } from "./monitoringRouter";
 import { reportRouter } from "./reportRouter";
 import { lawyerRouter } from "./lawyerRouter";
+import { controladoriaRouter } from "./controladoriaRouter";
 
 export const appRouter = router({
   system: systemRouter,
   monitoring: monitoringRouter,
   reports: reportRouter,
+  controladoria: controladoriaRouter,
   auth: router({
     me: publicProcedure.query(opts => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {

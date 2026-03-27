@@ -21,6 +21,7 @@ import CaseManagement from "./pages/CaseManagement";
 import { LawyerManagement } from "./pages/LawyerManagement";
 import LawyerProfile from "./pages/LawyerProfile";
 import LawyerPerformanceDashboard from "./pages/LawyerPerformanceDashboard";
+import ControladoriaDashboard from "./pages/ControladoriaDashboard";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -45,6 +46,7 @@ function Router() {
         <Route path="/lawyers" component={LawyerManagement} />
         <Route path="/lawyers/:id" component={(props: any) => <LawyerProfile />} />
         <Route path="/lawyers-performance" component={LawyerPerformanceDashboard} />
+        <Route path="/controladoria" component={ControladoriaDashboard} />
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />

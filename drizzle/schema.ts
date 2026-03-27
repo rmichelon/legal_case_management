@@ -752,3 +752,163 @@ export const lawyerPermissions = mysqlTable("lawyerPermissions", {
 
 export type LawyerPermission = typeof lawyerPermissions.$inferSelect;
 export type InsertLawyerPermission = typeof lawyerPermissions.$inferInsert;
+
+
+/**
+ * Controladoria - Main controller table for tracking firm operations
+ */
+export const controladoria = mysqlTable("controladoria", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  status: mysqlEnum("status", ["active", "inactive", "archived"]).default("active").notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Controladoria = typeof controladoria.$inferSelect;
+export type InsertControladoria = typeof controladoria.$inferInsert;
+
+/**
+ * Daily Reports - Automated daily reports for firm operations
+ */
+export const dailyReports = mysqlTable("dailyReports", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  reportDate: timestamp("reportDate").notNull(),
+  totalCases: int("totalCases").default(0),
+  activeCases: int("activeCases").default(0),
+  closedCases: int("closedCases").default(0),
+  overduePrazos: int("overduePrazos").default(0),
+  upcomingPrazos: int("upcomingPrazos").default(0),
+  totalDeadlines: int("totalDeadlines").default(0),
+  completedDeadlines: int("completedDeadlines").default(0),
+  totalLawyers: int("totalLawyers").default(0),
+  activeLawyers: int("activeLawyers").default(0),
+  totalClients: int("totalClients").default(0),
+  newCases: int("newCases").default(0),
+  closedCasesToday: int("closedCasesToday").default(0),
+  totalDocuments: int("totalDocuments").default(0),
+  newDocuments: int("newDocuments").default(0),
+  successRate: decimal("successRate", { precision: 5, scale: 2 }).default("0.00"), // percentage
+  averageResolutionTime: int("averageResolutionTime").default(0), // days
+  totalRevenue: decimal("totalRevenue", { precision: 15, scale: 2 }).default("0.00"),
+  reportContent: json("reportContent"), // Full report data as JSON
+  sentAt: timestamp("sentAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type DailyReport = typeof dailyReports.$inferSelect;
+export type InsertDailyReport = typeof dailyReports.$inferInsert;
+
+/**
+ * Alert Preferences - User preferences for different types of alerts
+ */
+export const alertPreferences = mysqlTable("alertPreferences", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  alertType: mysqlEnum("alertType", ["email", "sms", "push", "in_app"]).notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  frequency: mysqlEnum("frequency", ["immediate", "hourly", "daily", "weekly"]).default("daily").notNull(),
+  channels: json("channels"), // Array of enabled channels
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type AlertPreference = typeof alertPreferences.$inferSelect;
+export type InsertAlertPreference = typeof alertPreferences.$inferInsert;
+
+/**
+ * Alert History - Log of all alerts sent to users
+ */
+export const alertHistory = mysqlTable("alertHistory", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  alertType: mysqlEnum("alertType", ["deadline", "case_update", "document", "performance", "daily_report"]).notNull(),
+  channel: mysqlEnum("channel", ["email", "sms", "push", "in_app"]).notNull(),
+  title: varchar("title", { length: 255 }).notNull(),
+  message: text("message"),
+  relatedCaseId: int("relatedCaseId"),
+  relatedDeadlineId: int("relatedDeadlineId"),
+  status: mysqlEnum("status", ["sent", "failed", "pending"]).default("pending").notNull(),
+  sentAt: timestamp("sentAt"),
+  readAt: timestamp("readAt"),
+  failureReason: text("failureReason"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type AlertHistory = typeof alertHistory.$inferSelect;
+export type InsertAlertHistory = typeof alertHistory.$inferInsert;
+
+/**
+ * Performance Metrics - Track performance metrics for lawyers and cases
+ */
+export const performanceMetrics = mysqlTable("performanceMetrics", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  lawyerId: int("lawyerId"),
+  metricsDate: timestamp("metricsDate").notNull(),
+  casesHandled: int("casesHandled").default(0),
+  casesClosed: int("casesClosed").default(0),
+  successRate: decimal("successRate", { precision: 5, scale: 2 }).default("0.00"),
+  averageResolutionDays: int("averageResolutionDays").default(0),
+  deadlinesMissed: int("deadlinesMissed").default(0),
+  clientSatisfaction: decimal("clientSatisfaction", { precision: 3, scale: 1 }).default("0.0"), // 0-5 scale
+  billableHours: decimal("billableHours", { precision: 10, scale: 2 }).default("0.00"),
+  revenue: decimal("revenue", { precision: 15, scale: 2 }).default("0.00"),
+  casesByType: json("casesByType"), // Object with case type counts
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type PerformanceMetric = typeof performanceMetrics.$inferSelect;
+export type InsertPerformanceMetric = typeof performanceMetrics.$inferInsert;
+
+/**
+ * Scheduled Reports - Configure automated report generation and delivery
+ */
+export const scheduledReports = mysqlTable("scheduledReports", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  reportType: mysqlEnum("reportType", ["daily", "weekly", "monthly", "custom"]).notNull(),
+  name: varchar("name", { length: 255 }).notNull(),
+  description: text("description"),
+  schedule: varchar("schedule", { length: 100 }).notNull(), // Cron expression
+  recipients: json("recipients"), // Array of email addresses
+  includeMetrics: json("includeMetrics"), // Array of metric names to include
+  format: mysqlEnum("format", ["pdf", "email", "both"]).default("email").notNull(),
+  enabled: boolean("enabled").default(true).notNull(),
+  lastRunAt: timestamp("lastRunAt"),
+  nextRunAt: timestamp("nextRunAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ScheduledReport = typeof scheduledReports.$inferSelect;
+export type InsertScheduledReport = typeof scheduledReports.$inferInsert;
+
+/**
+ * Access Control - Role-based access control for controladoria features
+ */
+export const controladoriaAccess = mysqlTable("controladoriaAccess", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  role: mysqlEnum("role", ["admin", "lawyer", "partner", "manager"]).notNull(),
+  canViewAllCases: boolean("canViewAllCases").default(false),
+  canViewAllDeadlines: boolean("canViewAllDeadlines").default(false),
+  canViewReports: boolean("canViewReports").default(false),
+  canManageAlerts: boolean("canManageAlerts").default(false),
+  canGenerateReports: boolean("canGenerateReports").default(false),
+  canManageUsers: boolean("canManageUsers").default(false),
+  canViewPerformanceMetrics: boolean("canViewPerformanceMetrics").default(false),
+  grantedAt: timestamp("grantedAt").defaultNow().notNull(),
+  grantedBy: int("grantedBy").notNull(),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type ControladoriaAccess = typeof controladoriaAccess.$inferSelect;
+export type InsertControladoriaAccess = typeof controladoriaAccess.$inferInsert;

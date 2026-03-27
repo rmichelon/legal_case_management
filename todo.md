@@ -161,3 +161,16 @@
 - [x] Adicionar link "Advogados" à navegação principal
 - [x] Criar testes automatizados (3 testes passando)
 - [x] Validar compilação TypeScript
+
+
+## Módulo de Controladoria Advocatícia (Nova Feature)
+- [x] Estender schema com tabelas de controladoria (6 tabelas criadas)
+- [x] Criar procedures tRPC para CRUD de controladoria (40+ procedures)
+- [x] Implementar serviço de alertas (email, SMS, push, in-app)
+- [x] Criar dashboard de controladoria com gráficos e métricas
+- [x] Implementar geração de relatórios diários
+- [ ] Integrar com Google Calendar (sincronização bidirecional)
+- [ ] Implementar cron jobs para agendamento
+- [x] Criar sistema de controle de acesso (admin/advogado/sócio/manager)
+- [x] Implementar métricas de performance
+- [x] Criar testes do módulo de controladoria (20 testes passando)

@@ -1,6 +1,6 @@
 import { eq, and, desc, like, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, courtData, tribunalSyncConfig, caseInteractions, auditLog, lawyers, caseAssignments, lawyerAvailability, lawyerPerformance, lawyerSkills, lawyerWorkload, lawyerPermissions, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict, InsertCourtData, InsertTribunalSyncConfig, InsertCaseInteraction, InsertAuditLog, InsertLawyer, InsertCaseAssignment, InsertLawyerAvailability, InsertLawyerPerformance, InsertLawyerSkill, InsertLawyerWorkload, InsertLawyerPermission } from "../drizzle/schema";
+import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, courtData, tribunalSyncConfig, caseInteractions, auditLog, lawyers, caseAssignments, lawyerAvailability, lawyerPerformance, lawyerSkills, lawyerWorkload, lawyerPermissions, controladoria, dailyReports, alertPreferences, alertHistory, performanceMetrics, scheduledReports, controladoriaAccess, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict, InsertCourtData, InsertTribunalSyncConfig, InsertCaseInteraction, InsertAuditLog, InsertLawyer, InsertCaseAssignment, InsertLawyerAvailability, InsertLawyerPerformance, InsertLawyerSkill, InsertLawyerWorkload, InsertLawyerPermission, InsertControladoria, InsertDailyReport, InsertAlertPreference, InsertAlertHistory, InsertPerformanceMetric, InsertScheduledReport, InsertControladoriaAccess } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -1104,4 +1104,296 @@ export async function deleteLawyerPermission(id: number) {
   if (!db) throw new Error("Database not available");
 
   return await db.delete(lawyerPermissions).where(eq(lawyerPermissions.id, id));
+}
+
+
+// ============ CONTROLADORIA QUERIES ============
+
+export async function getControladoriaByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(controladoria).where(eq(controladoria.userId, userId));
+}
+
+export async function getControladoriaById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(controladoria).where(eq(controladoria.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createControladoria(data: InsertControladoria) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(controladoria).values(data);
+  
+  const insertId = (result as any)?.[0]?.insertId ?? (result as any)?.insertId;
+  if (insertId) {
+    const inserted = await getControladoriaById(insertId);
+    if (inserted) return inserted;
+  }
+  
+  return result;
+}
+
+export async function updateControladoria(id: number, data: Partial<InsertControladoria>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(controladoria).set(data).where(eq(controladoria.id, id));
+}
+
+export async function deleteControladoria(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(controladoria).where(eq(controladoria.id, id));
+}
+
+// ============ DAILY REPORTS QUERIES ============
+
+export async function getDailyReportsByUserId(userId: number, limit: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(dailyReports)
+    .where(eq(dailyReports.userId, userId))
+    .orderBy(desc(dailyReports.reportDate))
+    .limit(limit);
+}
+
+export async function getDailyReportById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(dailyReports).where(eq(dailyReports.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getDailyReportByDate(userId: number, reportDate: Date) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(dailyReports)
+    .where(and(
+      eq(dailyReports.userId, userId),
+      eq(dailyReports.reportDate, reportDate)
+    ))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createDailyReport(data: InsertDailyReport) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(dailyReports).values(data);
+  
+  const insertId = (result as any)?.[0]?.insertId ?? (result as any)?.insertId;
+  if (insertId) {
+    const inserted = await getDailyReportById(insertId);
+    if (inserted) return inserted;
+  }
+  
+  return result;
+}
+
+export async function updateDailyReport(id: number, data: Partial<InsertDailyReport>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(dailyReports).set(data).where(eq(dailyReports.id, id));
+}
+
+// ============ ALERT PREFERENCES QUERIES ============
+
+export async function getAlertPreferencesByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(alertPreferences).where(eq(alertPreferences.userId, userId));
+}
+
+export async function getAlertPreferenceByUserAndType(userId: number, alertType: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(alertPreferences)
+    .where(and(
+      eq(alertPreferences.userId, userId),
+      eq(alertPreferences.alertType, alertType as any)
+    ))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createAlertPreference(data: InsertAlertPreference) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(alertPreferences).values(data);
+}
+
+export async function updateAlertPreference(id: number, data: Partial<InsertAlertPreference>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(alertPreferences).set(data).where(eq(alertPreferences.id, id));
+}
+
+// ============ ALERT HISTORY QUERIES ============
+
+export async function getAlertHistoryByUserId(userId: number, limit: number = 50) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(alertHistory)
+    .where(eq(alertHistory.userId, userId))
+    .orderBy(desc(alertHistory.createdAt))
+    .limit(limit);
+}
+
+export async function createAlertHistory(data: InsertAlertHistory) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(alertHistory).values(data);
+}
+
+export async function updateAlertHistory(id: number, data: Partial<InsertAlertHistory>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(alertHistory).set(data).where(eq(alertHistory.id, id));
+}
+
+// ============ PERFORMANCE METRICS QUERIES ============
+
+export async function getPerformanceMetricsByUserId(userId: number, limit: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(performanceMetrics)
+    .where(eq(performanceMetrics.userId, userId))
+    .orderBy(desc(performanceMetrics.metricsDate))
+    .limit(limit);
+}
+
+export async function getPerformanceMetricsByLawyerId(lawyerId: number, limit: number = 30) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(performanceMetrics)
+    .where(eq(performanceMetrics.lawyerId, lawyerId))
+    .orderBy(desc(performanceMetrics.metricsDate))
+    .limit(limit);
+}
+
+export async function createPerformanceMetric(data: InsertPerformanceMetric) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(performanceMetrics).values(data);
+}
+
+export async function updatePerformanceMetric(id: number, data: Partial<InsertPerformanceMetric>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(performanceMetrics).set(data).where(eq(performanceMetrics.id, id));
+}
+
+// ============ SCHEDULED REPORTS QUERIES ============
+
+export async function getScheduledReportsByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(scheduledReports).where(eq(scheduledReports.userId, userId));
+}
+
+export async function getScheduledReportById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(scheduledReports).where(eq(scheduledReports.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createScheduledReport(data: InsertScheduledReport) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(scheduledReports).values(data);
+  
+  const insertId = (result as any)?.[0]?.insertId ?? (result as any)?.insertId;
+  if (insertId) {
+    const inserted = await getScheduledReportById(insertId);
+    if (inserted) return inserted;
+  }
+  
+  return result;
+}
+
+export async function updateScheduledReport(id: number, data: Partial<InsertScheduledReport>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(scheduledReports).set(data).where(eq(scheduledReports.id, id));
+}
+
+export async function deleteScheduledReport(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(scheduledReports).where(eq(scheduledReports.id, id));
+}
+
+// ============ CONTROLADORIA ACCESS QUERIES ============
+
+export async function getControladoriaAccessByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(controladoriaAccess).where(eq(controladoriaAccess.userId, userId));
+}
+
+export async function getControladoriaAccessByUserAndRole(userId: number, role: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(controladoriaAccess)
+    .where(and(
+      eq(controladoriaAccess.userId, userId),
+      eq(controladoriaAccess.role, role as any)
+    ))
+    .limit(1);
+  
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createControladoriaAccess(data: InsertControladoriaAccess) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(controladoriaAccess).values(data);
+}
+
+export async function updateControladoriaAccess(id: number, data: Partial<InsertControladoriaAccess>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(controladoriaAccess).set(data).where(eq(controladoriaAccess.id, id));
+}
+
+export async function deleteControladoriaAccess(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(controladoriaAccess).where(eq(controladoriaAccess.id, id));
 }
