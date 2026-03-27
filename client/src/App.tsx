@@ -17,6 +17,7 @@ import Calendar from "./pages/Calendar";
 import CaseDetailPage from "./pages/CaseDetailPage";
 import MonitoringDashboard from "./pages/MonitoringDashboard";
 import ReportsPage from "./pages/ReportsPage";
+import CaseManagement from "./pages/CaseManagement";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -37,6 +38,7 @@ function Router() {
         <Route path="/calendar" component={Calendar} />
         <Route path="/monitoring" component={MonitoringDashboard} />
         <Route path="/reports" component={ReportsPage} />
+        <Route path="/management" component={CaseManagement} />
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />

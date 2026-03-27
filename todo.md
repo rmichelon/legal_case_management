@@ -130,10 +130,22 @@
 
 
 ## Exportação de Relatórios em PDF (Nova Feature)
-- [ ] Criar serviço de geração de relatórios
-- [ ] Implementar geração de PDF com ReportLab
-- [ ] Adicionar gráficos de uptime e taxa de sucesso
-- [ ] Criar procedures tRPC para exportação
-- [ ] Desenvolver página de Relatórios
+- [x] Criar serviço de geração de relatórios
+- [x] Implementar geração de PDF com ReportLab
+- [x] Adicionar gráficos de uptime e taxa de sucesso
+- [x] Criar procedures tRPC para exportação
+- [x] Desenvolver página de Relatórios
 - [ ] Implementar agendamento de relatórios por email
 - [ ] Testes da funcionalidade de exportação
+
+## Módulo de Gestão de Processos Integrado (Nova Feature)
+- [x] Criar página de Gestão de Processos com tabela completa
+- [x] Implementar filtros por status, tribunal, cliente, data
+- [x] Adicionar busca avançada de processos
+- [x] Criar componente de ações em lote
+- [x] Integrar widgets ao Dashboard
+- [x] Integrar status de sincronização ao Monitoramento
+- [x] Criar indicadores visuais de saúde dos processos
+- [x] Adicionar link de Gestão à navegação principal
+- [ ] Implementar sincronização em lote (em progresso)
+- [ ] Testes do módulo de gestão

@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, FileText, Users, Plus } from "lucide-react";
+import { AlertCircle, Calendar, FileText, Users, Plus, Briefcase, RefreshCw, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -134,7 +134,48 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Upcoming Deadlines */}
+        {/* Case Management Widgets */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-accent" />
+                Gestão de Processos
+              </CardTitle>
+              <CardDescription>Acesso rápido à gestão completa</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => navigate("/management")}
+                className="w-full bg-accent hover:bg-accent/90"
+              >
+                <Briefcase className="w-4 h-4 mr-2" />
+                Ir para Gestão de Processos
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <RefreshCw className="w-5 h-5 text-accent" />
+                Sincronização
+              </CardTitle>
+              <CardDescription>Status de sincronização com tribunais</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => navigate("/monitoring")}
+                className="w-full bg-accent hover:bg-accent/90"
+              >
+                <TrendingUp className="w-4 h-4 mr-2" />
+                Ver Monitoramento
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Upcoming Deadlines and Recent Cases */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <Card>

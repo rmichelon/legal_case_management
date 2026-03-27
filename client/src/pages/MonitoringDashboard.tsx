@@ -116,9 +116,10 @@ export default function MonitoringDashboard() {
           {/* Left Column - Health Status */}
           <div className="lg:col-span-2">
             <Tabs defaultValue="health" className="w-full">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="health">Saúde</TabsTrigger>
                 <TabsTrigger value="alerts">Alertas</TabsTrigger>
+                <TabsTrigger value="cases">Processos</TabsTrigger>
                 <TabsTrigger value="performance">Performance</TabsTrigger>
               </TabsList>
 
@@ -179,6 +180,47 @@ export default function MonitoringDashboard() {
                       <div className="text-center py-8">
                         <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-3" />
                         <p className="text-gray-600">Nenhum alerta ativo</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              {/* Case Status Tab */}
+              <TabsContent value="cases" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Status de Sincronização de Processos</CardTitle>
+                    <CardDescription>Quais processos estão sincronizados com os tribunais</CardDescription>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {dashboardQuery.data?.recentSyncs && dashboardQuery.data.recentSyncs.length > 0 ? (
+                      <div className="space-y-3">
+                        {dashboardQuery.data.recentSyncs.map((sync) => (
+                          <div key={sync.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50">
+                            <div className="flex items-center gap-3 flex-1">
+                              {sync.status === 'success' ? (
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                              ) : (
+                                <AlertCircle className="w-5 h-5 text-red-600" />
+                              )}
+                              <div className="flex-1">
+                                <p className="font-semibold text-foreground">Processo #{sync.caseId}</p>
+                                <p className="text-sm text-muted-foreground">
+                                  Sincronizado em: {new Date(sync.createdAt).toLocaleString('pt-BR')}
+                                </p>
+                              </div>
+                            </div>
+                            <Badge variant={sync.status === 'success' ? 'default' : 'destructive'}>
+                              {sync.status === 'success' ? 'Sincronizado' : 'Erro'}
+                            </Badge>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8">
+                        <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+                        <p className="text-muted-foreground">Nenhuma sincronização recente</p>
                       </div>
                     )}
                   </CardContent>

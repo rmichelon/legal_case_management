@@ -157,7 +157,17 @@ export async function createCase(data: typeof cases.$inferInsert) {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
-  return await db.insert(cases).values(data);
+  const result = await db.insert(cases).values(data);
+  
+  // Get the inserted case ID and return the full record
+  const insertId = (result as any)?.[0]?.insertId ?? (result as any)?.insertId;
+  if (insertId) {
+    const inserted = await getCaseById(insertId);
+    if (inserted) return inserted;
+  }
+  
+  // Fallback: return the result as-is if we can't get the full record
+  return result;
 }
 
 export async function updateCase(id: number, data: Partial<typeof cases.$inferInsert>) {
