@@ -5,7 +5,7 @@ import { trpc } from "@/lib/trpc";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { AlertCircle, Calendar, FileText, Users, Plus, Briefcase, RefreshCw, TrendingUp } from "lucide-react";
+import { AlertCircle, Calendar, FileText, Users, Plus, Briefcase, RefreshCw, TrendingUp, Scale } from "lucide-react";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 
@@ -23,6 +23,10 @@ export default function Dashboard() {
   );
 
   const { data: clients = [] } = trpc.clients.list.useQuery(undefined, {
+    enabled: isAuthenticated,
+  });
+
+  const { data: lawyers = [] } = trpc.lawyers.list.useQuery(undefined, {
     enabled: isAuthenticated,
   });
 
@@ -132,10 +136,25 @@ export default function Dashboard() {
               </p>
             </CardContent>
           </Card>
+
+          <Card className="border-l-4 border-l-accent">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                <Scale className="w-4 h-4" />
+                Advogados
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-foreground">{lawyers.length}</div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Ativos no sistema
+              </p>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Case Management Widgets */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -170,6 +189,25 @@ export default function Dashboard() {
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Ver Monitoramento
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Scale className="w-5 h-5 text-accent" />
+                Gestão de Advogados
+              </CardTitle>
+              <CardDescription>Gerenciar equipe de advogados</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Button
+                onClick={() => navigate("/lawyers")}
+                className="w-full bg-accent hover:bg-accent/90"
+              >
+                <Scale className="w-4 h-4 mr-2" />
+                Ir para Advogados
               </Button>
             </CardContent>
           </Card>

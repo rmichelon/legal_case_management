@@ -15,6 +15,7 @@ import { webhookRouter } from "./webhookRouter";
 import { caseManagementRouter } from "./caseManagementRouter";
 import { monitoringRouter } from "./monitoringRouter";
 import { reportRouter } from "./reportRouter";
+import { lawyerRouter } from "./lawyerRouter";
 
 export const appRouter = router({
   system: systemRouter,
@@ -458,5 +459,6 @@ export const appRouter = router({
   googleCalendar: googleCalendarRouter,
   webhook: webhookRouter,
   caseManagement: caseManagementRouter,
+  lawyers: lawyerRouter,
 });
 export type AppRouter = typeof appRouter;

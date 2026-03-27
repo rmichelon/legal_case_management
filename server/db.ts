@@ -1,6 +1,6 @@
 import { eq, and, desc, like, gte, lte } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, courtData, tribunalSyncConfig, caseInteractions, auditLog, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict, InsertCourtData, InsertTribunalSyncConfig, InsertCaseInteraction, InsertAuditLog } from "../drizzle/schema";
+import { InsertUser, users, cases, clients, deadlines, documents, movements, chatHistory, emailAlerts, notifications, notificationPreferences, googleCalendarIntegrations, calendarEvents, webhookSubscriptions, syncHistory, syncConflicts, courtData, tribunalSyncConfig, caseInteractions, auditLog, lawyers, caseAssignments, lawyerAvailability, lawyerPerformance, lawyerSkills, lawyerWorkload, lawyerPermissions, InsertGoogleCalendarIntegration, InsertCalendarEvent, InsertWebhookSubscription, InsertSyncHistory, InsertSyncConflict, InsertCourtData, InsertTribunalSyncConfig, InsertCaseInteraction, InsertAuditLog, InsertLawyer, InsertCaseAssignment, InsertLawyerAvailability, InsertLawyerPerformance, InsertLawyerSkill, InsertLawyerWorkload, InsertLawyerPermission } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -860,4 +860,248 @@ export async function getAuditLogByCaseId(caseId: number, limit: number = 100) {
     console.error("[Database] Failed to get audit log:", error);
     return [];
   }
+}
+
+
+// ============ LAWYERS QUERIES ============
+
+export async function getLawyersByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(lawyers).where(eq(lawyers.userId, userId));
+}
+
+export async function getLawyerById(id: number) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(lawyers).where(eq(lawyers.id, id)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function getLawyerByOabNumber(oabNumber: string) {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db.select().from(lawyers).where(eq(lawyers.oabNumber, oabNumber)).limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
+export async function createLawyer(data: InsertLawyer) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(lawyers).values(data);
+  
+  // Get the inserted lawyer ID and return the full record
+  const insertId = (result as any)?.[0]?.insertId ?? (result as any)?.insertId;
+  if (insertId) {
+    const inserted = await getLawyerById(insertId);
+    if (inserted) return inserted;
+  }
+  
+  return result;
+}
+
+export async function updateLawyer(id: number, data: Partial<InsertLawyer>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(lawyers).set(data).where(eq(lawyers.id, id));
+}
+
+export async function deleteLawyer(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(lawyers).where(eq(lawyers.id, id));
+}
+
+export async function searchLawyers(userId: number, query: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(lawyers)
+    .where(and(
+      eq(lawyers.userId, userId),
+      like(lawyers.name, `%${query}%`)
+    ));
+}
+
+// ============ CASE ASSIGNMENTS QUERIES ============
+
+export async function getCaseAssignmentsByCaseId(caseId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(caseAssignments).where(eq(caseAssignments.caseId, caseId));
+}
+
+export async function getCaseAssignmentsByLawyerId(lawyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(caseAssignments).where(eq(caseAssignments.lawyerId, lawyerId));
+}
+
+export async function createCaseAssignment(data: InsertCaseAssignment) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const result = await db.insert(caseAssignments).values(data);
+  
+  const insertId = (result as any)?.[0]?.insertId ?? (result as any)?.insertId;
+  if (insertId) {
+    const inserted = await db.select().from(caseAssignments).where(eq(caseAssignments.id, insertId)).limit(1);
+    if (inserted.length > 0) return inserted[0];
+  }
+  
+  return result;
+}
+
+export async function updateCaseAssignment(id: number, data: Partial<InsertCaseAssignment>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(caseAssignments).set(data).where(eq(caseAssignments.id, id));
+}
+
+export async function deleteCaseAssignment(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(caseAssignments).where(eq(caseAssignments.id, id));
+}
+
+// ============ LAWYER AVAILABILITY QUERIES ============
+
+export async function getLawyerAvailabilityByLawyerId(lawyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(lawyerAvailability).where(eq(lawyerAvailability.lawyerId, lawyerId));
+}
+
+export async function createLawyerAvailability(data: InsertLawyerAvailability) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(lawyerAvailability).values(data);
+}
+
+export async function updateLawyerAvailability(id: number, data: Partial<InsertLawyerAvailability>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(lawyerAvailability).set(data).where(eq(lawyerAvailability.id, id));
+}
+
+// ============ LAWYER PERFORMANCE QUERIES ============
+
+export async function getLawyerPerformanceByLawyerId(lawyerId: number, period?: string) {
+  const db = await getDb();
+  if (!db) return [];
+
+  if (period) {
+    return await db.select().from(lawyerPerformance)
+      .where(and(
+        eq(lawyerPerformance.lawyerId, lawyerId),
+        eq(lawyerPerformance.period, period as any)
+      ));
+  }
+
+  return await db.select().from(lawyerPerformance).where(eq(lawyerPerformance.lawyerId, lawyerId));
+}
+
+export async function createLawyerPerformance(data: InsertLawyerPerformance) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(lawyerPerformance).values(data);
+}
+
+export async function updateLawyerPerformance(id: number, data: Partial<InsertLawyerPerformance>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(lawyerPerformance).set(data).where(eq(lawyerPerformance.id, id));
+}
+
+// ============ LAWYER SKILLS QUERIES ============
+
+export async function getLawyerSkillsByLawyerId(lawyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(lawyerSkills).where(eq(lawyerSkills.lawyerId, lawyerId));
+}
+
+export async function createLawyerSkill(data: InsertLawyerSkill) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(lawyerSkills).values(data);
+}
+
+export async function updateLawyerSkill(id: number, data: Partial<InsertLawyerSkill>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(lawyerSkills).set(data).where(eq(lawyerSkills.id, id));
+}
+
+export async function deleteLawyerSkill(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(lawyerSkills).where(eq(lawyerSkills.id, id));
+}
+
+// ============ LAWYER WORKLOAD QUERIES ============
+
+export async function getLawyerWorkloadByLawyerId(lawyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(lawyerWorkload)
+    .where(eq(lawyerWorkload.lawyerId, lawyerId))
+    .orderBy(desc(lawyerWorkload.date));
+}
+
+export async function createLawyerWorkload(data: InsertLawyerWorkload) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(lawyerWorkload).values(data);
+}
+
+export async function updateLawyerWorkload(id: number, data: Partial<InsertLawyerWorkload>) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(lawyerWorkload).set(data).where(eq(lawyerWorkload.id, id));
+}
+
+// ============ LAWYER PERMISSIONS QUERIES ============
+
+export async function getLawyerPermissionsByLawyerId(lawyerId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(lawyerPermissions).where(eq(lawyerPermissions.lawyerId, lawyerId));
+}
+
+export async function createLawyerPermission(data: InsertLawyerPermission) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.insert(lawyerPermissions).values(data);
+}
+
+export async function deleteLawyerPermission(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.delete(lawyerPermissions).where(eq(lawyerPermissions.id, id));
 }

@@ -609,3 +609,146 @@ export const integrationConfig = mysqlTable('integrationConfig', {
 
 export type IntegrationConfig = typeof integrationConfig.$inferSelect;
 export type InsertIntegrationConfig = typeof integrationConfig.$inferInsert;
+
+/**
+ * Lawyers/Advogados table - stores information about lawyers in the firm
+ */
+export const lawyers = mysqlTable("lawyers", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(), // Firm owner/admin who manages this lawyer
+  name: varchar("name", { length: 255 }).notNull(),
+  email: varchar("email", { length: 320 }).notNull(),
+  phone: varchar("phone", { length: 20 }),
+  oabNumber: varchar("oabNumber", { length: 20 }).unique(), // OAB registration number
+  oabState: varchar("oabState", { length: 2 }), // State of OAB registration
+  specialties: text("specialties"), // JSON array of specialties
+  bio: text("bio"),
+  profileImage: varchar("profileImage", { length: 500 }), // URL to profile image
+  status: mysqlEnum("status", ["active", "inactive", "on_leave", "retired"]).default("active").notNull(),
+  joinDate: timestamp("joinDate").defaultNow().notNull(),
+  yearsOfExperience: int("yearsOfExperience"),
+  hourlyRate: decimal("hourlyRate", { precision: 10, scale: 2 }), // Billing rate
+  officeLocation: varchar("officeLocation", { length: 255 }), // Office address
+  workingHours: text("workingHours"), // JSON with working hours schedule
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type Lawyer = typeof lawyers.$inferSelect;
+export type InsertLawyer = typeof lawyers.$inferInsert;
+
+/**
+ * Case Assignments - tracks which lawyers are assigned to which cases
+ */
+export const caseAssignments = mysqlTable("caseAssignments", {
+  id: int("id").autoincrement().primaryKey(),
+  caseId: int("caseId").notNull(),
+  lawyerId: int("lawyerId").notNull(),
+  role: mysqlEnum("role", ["lead", "co_counsel", "junior", "consultant"]).default("lead").notNull(),
+  assignedAt: timestamp("assignedAt").defaultNow().notNull(),
+  assignedBy: int("assignedBy").notNull(), // User who made the assignment
+  unassignedAt: timestamp("unassignedAt"),
+  hoursWorked: decimal("hoursWorked", { precision: 10, scale: 2 }).default("0.00"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type CaseAssignment = typeof caseAssignments.$inferSelect;
+export type InsertCaseAssignment = typeof caseAssignments.$inferInsert;
+
+/**
+ * Lawyer Availability - tracks lawyer availability and calendar
+ */
+export const lawyerAvailability = mysqlTable("lawyerAvailability", {
+  id: int("id").autoincrement().primaryKey(),
+  lawyerId: int("lawyerId").notNull(),
+  dayOfWeek: int("dayOfWeek").notNull(), // 0-6 (Sunday-Saturday)
+  startTime: varchar("startTime", { length: 5 }).notNull(), // HH:MM format
+  endTime: varchar("endTime", { length: 5 }).notNull(), // HH:MM format
+  isAvailable: boolean("isAvailable").default(true).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LawyerAvailability = typeof lawyerAvailability.$inferSelect;
+export type InsertLawyerAvailability = typeof lawyerAvailability.$inferInsert;
+
+/**
+ * Lawyer Performance Metrics - tracks performance statistics for each lawyer
+ */
+export const lawyerPerformance = mysqlTable("lawyerPerformance", {
+  id: int("id").autoincrement().primaryKey(),
+  lawyerId: int("lawyerId").notNull(),
+  period: mysqlEnum("period", ["daily", "weekly", "monthly", "yearly"]).notNull(),
+  periodDate: timestamp("periodDate").notNull(),
+  totalCasesAssigned: int("totalCasesAssigned").default(0),
+  activeCases: int("activeCases").default(0),
+  closedCases: int("closedCases").default(0),
+  successfulCases: int("successfulCases").default(0),
+  totalHoursWorked: decimal("totalHoursWorked", { precision: 10, scale: 2 }).default("0.00"),
+  totalBilled: decimal("totalBilled", { precision: 15, scale: 2 }).default("0.00"),
+  averageHoursPerCase: decimal("averageHoursPerCase", { precision: 10, scale: 2 }).default("0.00"),
+  caseSuccessRate: decimal("caseSuccessRate", { precision: 5, scale: 2 }).default("0.00"), // percentage
+  clientSatisfactionRating: decimal("clientSatisfactionRating", { precision: 3, scale: 2 }), // 0-5
+  deadlinesMissed: int("deadlinesMissed").default(0),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LawyerPerformance = typeof lawyerPerformance.$inferSelect;
+export type InsertLawyerPerformance = typeof lawyerPerformance.$inferInsert;
+
+/**
+ * Lawyer Skills - tracks skills and certifications for each lawyer
+ */
+export const lawyerSkills = mysqlTable("lawyerSkills", {
+  id: int("id").autoincrement().primaryKey(),
+  lawyerId: int("lawyerId").notNull(),
+  skillName: varchar("skillName", { length: 255 }).notNull(),
+  proficiencyLevel: mysqlEnum("proficiencyLevel", ["beginner", "intermediate", "advanced", "expert"]).default("intermediate").notNull(),
+  certificationNumber: varchar("certificationNumber", { length: 100 }),
+  certificationDate: timestamp("certificationDate"),
+  expiryDate: timestamp("expiryDate"),
+  notes: text("notes"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LawyerSkill = typeof lawyerSkills.$inferSelect;
+export type InsertLawyerSkill = typeof lawyerSkills.$inferInsert;
+
+/**
+ * Lawyer Workload - tracks current workload for each lawyer
+ */
+export const lawyerWorkload = mysqlTable("lawyerWorkload", {
+  id: int("id").autoincrement().primaryKey(),
+  lawyerId: int("lawyerId").notNull(),
+  date: timestamp("date").defaultNow().notNull(),
+  scheduledHours: decimal("scheduledHours", { precision: 10, scale: 2 }).default("0.00"),
+  actualHours: decimal("actualHours", { precision: 10, scale: 2 }).default("0.00"),
+  activeCaseCount: int("activeCaseCount").default(0),
+  deadlineCount: int("deadlineCount").default(0),
+  overloadPercentage: decimal("overloadPercentage", { precision: 5, scale: 2 }).default("0.00"), // percentage over capacity
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+});
+
+export type LawyerWorkload = typeof lawyerWorkload.$inferSelect;
+export type InsertLawyerWorkload = typeof lawyerWorkload.$inferInsert;
+
+/**
+ * Lawyer Permissions - manages role-based access control for lawyers
+ */
+export const lawyerPermissions = mysqlTable("lawyerPermissions", {
+  id: int("id").autoincrement().primaryKey(),
+  lawyerId: int("lawyerId").notNull(),
+  permission: varchar("permission", { length: 100 }).notNull(), // e.g., "view_all_cases", "edit_cases", "manage_clients"
+  grantedAt: timestamp("grantedAt").defaultNow().notNull(),
+  grantedBy: int("grantedBy").notNull(),
+  expiresAt: timestamp("expiresAt"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+});
+
+export type LawyerPermission = typeof lawyerPermissions.$inferSelect;
+export type InsertLawyerPermission = typeof lawyerPermissions.$inferInsert;

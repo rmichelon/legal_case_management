@@ -2,7 +2,7 @@ import { useAuth } from "@/_core/hooks/useAuth";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { getLoginUrl } from "@/const";
-import { FileText, Search, MessageSquare, Users, LogOut, Bell, Calendar, TrendingUp, BarChart3, Briefcase } from "lucide-react";
+import { FileText, Search, MessageSquare, Users, LogOut, Bell, Calendar, TrendingUp, BarChart3, Briefcase, Scale } from "lucide-react";
 import NotificationBell from "./NotificationBell";
 
 export default function Navigation() {
@@ -106,6 +106,15 @@ export default function Navigation() {
             >
               <Briefcase className="w-4 h-4" />
               Gestão
+            </Button>
+
+            <Button
+              variant={isActive("/lawyers") ? "default" : "ghost"}
+              onClick={() => navigate("/lawyers")}
+              className="gap-2"
+            >
+              <Scale className="w-4 h-4" />
+              Advogados
             </Button>
           </div>
         </div>

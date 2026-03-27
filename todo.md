@@ -149,3 +149,15 @@
 - [x] Adicionar link de Gestão à navegação principal
 - [ ] Implementar sincronização em lote (em progresso)
 - [ ] Testes do módulo de gestão
+
+## Módulo de Gestão de Advogados (Nova Feature)
+- [x] Criar schema de banco de dados para advogados (7 tabelas)
+- [x] Implementar procedures tRPC para CRUD de advogados
+- [x] Criar página de gestão de advogados com tabela e filtros
+- [x] Implementar perfil detalhado do advogado com abas
+- [x] Criar sistema de atribuição de casos
+- [x] Implementar dashboard de performance com gráficos
+- [x] Integrar widgets ao Dashboard principal
+- [x] Adicionar link "Advogados" à navegação principal
+- [x] Criar testes automatizados (3 testes passando)
+- [x] Validar compilação TypeScript

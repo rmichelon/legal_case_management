@@ -18,6 +18,9 @@ import CaseDetailPage from "./pages/CaseDetailPage";
 import MonitoringDashboard from "./pages/MonitoringDashboard";
 import ReportsPage from "./pages/ReportsPage";
 import CaseManagement from "./pages/CaseManagement";
+import { LawyerManagement } from "./pages/LawyerManagement";
+import LawyerProfile from "./pages/LawyerProfile";
+import LawyerPerformanceDashboard from "./pages/LawyerPerformanceDashboard";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -39,6 +42,9 @@ function Router() {
         <Route path="/monitoring" component={MonitoringDashboard} />
         <Route path="/reports" component={ReportsPage} />
         <Route path="/management" component={CaseManagement} />
+        <Route path="/lawyers" component={LawyerManagement} />
+        <Route path="/lawyers/:id" component={(props: any) => <LawyerProfile />} />
+        <Route path="/lawyers-performance" component={LawyerPerformanceDashboard} />
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />
