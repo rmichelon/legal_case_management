@@ -198,3 +198,12 @@
 - [x] Implementar geração de Excel com exceljs
 - [x] Adicionar botões de exportação ao frontend
 - [x] Testar exportações (77 testes passando)
+
+
+## Correções de Erros (BUG FIX)
+- [x] Remover imports inválidos de @/types no backend
+- [x] Corrigir tipagem de RGB no exportService.ts
+- [x] Corrigir paginação de PDF (currentPage reference)
+- [x] Adicionar isolatedModules ao tsconfig.json
+- [x] Limpar cache de build e reinstalar dependências
+- [x] Validar que todos os 77 testes continuam passando
