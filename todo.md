@@ -218,3 +218,10 @@
 - [x] Integrar modal no CaseManagement
 - [x] Testes para modal de confirmação (12 testes)
 - [x] Validar e salvar checkpoint
+
+
+## Correção de Erros de tRPC e WebSocket (Bug Fix)
+- [x] Corrigir tipo CaseExportData para aceitar null em description, judge, opposingParty
+- [x] Verificar configuração de tRPC e contexto
+- [x] Reiniciar servidor após correções
+- [x] Validar que erros de JSON parsing foram resolvidos

@@ -6,11 +6,11 @@ interface CaseExportData {
   id: number;
   caseNumber: string;
   title: string;
-  description?: string;
+  description?: string | null;
   caseType: string;
   court: string;
-  judge?: string;
-  opposingParty?: string;
+  judge?: string | null;
+  opposingParty?: string | null;
   status: string;
   priority: string;
   createdAt: Date;
