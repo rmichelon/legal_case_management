@@ -1,5 +1,6 @@
 import { useState, useMemo } from "react";
 import { useLocation } from "wouter";
+import { DeleteConfirmationModal } from "@/components/DeleteConfirmationModal";
 import { trpc } from "@/lib/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,6 +63,8 @@ export default function CaseManagement() {
     court: "",
     clientId: "",
   });
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [caseToDelete, setCaseToDelete] = useState<CaseItem | null>(null);
 
   // Fetch cases with filters
   const { data: cases, isLoading, refetch } = trpc.cases.search.useQuery({
@@ -130,12 +133,25 @@ export default function CaseManagement() {
   const deleteMutation = trpc.cases.delete.useMutation({
     onSuccess: () => {
       toast.success("Processo deletado com sucesso");
+      setDeleteModalOpen(false);
+      setCaseToDelete(null);
       refetch();
     },
     onError: (error: any) => {
       toast.error(`Erro ao deletar processo: ${error.message}`);
     },
   });
+
+  const handleDeleteClick = (caseItem: CaseItem) => {
+    setCaseToDelete(caseItem);
+    setDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (caseToDelete) {
+      deleteMutation.mutate({ id: caseToDelete.id });
+    }
+  };
 
   // Filter cases
   const filteredCases = useMemo(() => {
@@ -493,11 +509,7 @@ export default function CaseManagement() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => {
-                              if (confirm(`Deseja realmente deletar o processo ${caseItem.caseNumber}?`)) {
-                                deleteMutation.mutate({ id: caseItem.id });
-                              }
-                            }}
+                            onClick={() => handleDeleteClick(caseItem)}
                             disabled={deleteMutation.isPending}
                             title="Deletar"
                             className="text-destructive hover:bg-destructive/10"
@@ -514,6 +526,21 @@ export default function CaseManagement() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      {caseToDelete && (
+        <DeleteConfirmationModal
+          isOpen={deleteModalOpen}
+          caseNumber={caseToDelete.caseNumber}
+          caseTitle={caseToDelete.title}
+          isLoading={deleteMutation.isPending}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => {
+            setDeleteModalOpen(false);
+            setCaseToDelete(null);
+          }}
+        />
+      )}
     </div>
   );
 }

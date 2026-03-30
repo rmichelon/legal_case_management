@@ -210,3 +210,11 @@
 - [x] Navegação corrigida para detalhes do processo após edição
 - [x] Testes automatizados para update e delete (4 novos testes)
 - [x] Todos os 81 testes passando
+
+## Modal de Confirmação para Delete (Nova Feature)
+- [x] Criar componente DeleteConfirmationModal.tsx
+- [x] Exibir número do processo no modal
+- [x] Validação de segurança (input de confirmação)
+- [x] Integrar modal no CaseManagement
+- [x] Testes para modal de confirmação (12 testes)
+- [x] Validar e salvar checkpoint
