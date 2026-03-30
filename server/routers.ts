@@ -17,6 +17,7 @@ import { monitoringRouter } from "./monitoringRouter";
 import { reportRouter } from "./reportRouter";
 import { lawyerRouter } from "./lawyerRouter";
 import { controladoriaRouter } from "./controladoriaRouter";
+import { ExportService } from "./exportService";
 
 export const appRouter = router({
   system: systemRouter,
@@ -479,6 +480,62 @@ export const appRouter = router({
           clients: clients || [],
           lawyers: lawyers || [],
           total: (cases?.length || 0) + (clients?.length || 0) + (lawyers?.length || 0),
+        };
+      }),
+  }),
+
+  export: router({
+    toPDF: protectedProcedure
+      .input(z.object({
+        caseIds: z.array(z.number()).optional(),
+        status: z.string().optional(),
+        court: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        let cases = await db.getCasesByUserId(ctx.user.id);
+        
+        if (input.caseIds && input.caseIds.length > 0) {
+          cases = cases.filter(c => input.caseIds!.includes(c.id));
+        }
+        if (input.status) {
+          cases = cases.filter(c => c.status === input.status);
+        }
+        if (input.court) {
+          cases = cases.filter(c => c.court === input.court);
+        }
+
+        const pdfBuffer = await ExportService.exportToPDF(cases);
+        return {
+          data: pdfBuffer.toString('base64'),
+          filename: `processos_${new Date().getTime()}.pdf`,
+          mimeType: 'application/pdf',
+        };
+      }),
+
+    toExcel: protectedProcedure
+      .input(z.object({
+        caseIds: z.array(z.number()).optional(),
+        status: z.string().optional(),
+        court: z.string().optional(),
+      }))
+      .mutation(async ({ ctx, input }) => {
+        let cases = await db.getCasesByUserId(ctx.user.id);
+        
+        if (input.caseIds && input.caseIds.length > 0) {
+          cases = cases.filter(c => input.caseIds!.includes(c.id));
+        }
+        if (input.status) {
+          cases = cases.filter(c => c.status === input.status);
+        }
+        if (input.court) {
+          cases = cases.filter(c => c.court === input.court);
+        }
+
+        const excelBuffer = await ExportService.exportToExcel(cases);
+        return {
+          data: excelBuffer.toString('base64'),
+          filename: `processos_${new Date().getTime()}.xlsx`,
+          mimeType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         };
       }),
   }),

@@ -92,6 +92,38 @@ export default function CaseManagement() {
     },
   });
 
+  // Export to PDF mutation
+  const exportPDFMutation = trpc.export.toPDF.useMutation({
+    onSuccess: (data) => {
+      const link = document.createElement("a");
+      link.href = `data:${data.mimeType};base64,${data.data}`;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("PDF exportado com sucesso");
+    },
+    onError: (error: any) => {
+      toast.error(`Erro ao exportar PDF: ${error.message}`);
+    },
+  });
+
+  // Export to Excel mutation
+  const exportExcelMutation = trpc.export.toExcel.useMutation({
+    onSuccess: (data) => {
+      const link = document.createElement("a");
+      link.href = `data:${data.mimeType};base64,${data.data}`;
+      link.download = data.filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      toast.success("Excel exportado com sucesso");
+    },
+    onError: (error: any) => {
+      toast.error(`Erro ao exportar Excel: ${error.message}`);
+    },
+  });
+
   // Filter cases
   const filteredCases = useMemo(() => {
     if (!cases) return [];
@@ -184,13 +216,35 @@ export default function CaseManagement() {
             Gerencie e sincronize seus processos judiciais
           </p>
         </div>
-        <Button
-          onClick={() => navigate("/cases/new")}
-          className="gap-2 bg-accent hover:bg-accent/90"
-        >
-          <Plus className="w-4 h-4" />
-          Novo Processo
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => exportPDFMutation.mutate({ status: filters.status, court: filters.court })}
+            disabled={!filteredCases || filteredCases.length === 0 || exportPDFMutation.isPending}
+            variant="outline"
+            className="gap-2"
+            title="Exportar para PDF"
+          >
+            <Download className="w-4 h-4" />
+            PDF
+          </Button>
+          <Button
+            onClick={() => exportExcelMutation.mutate({ status: filters.status, court: filters.court })}
+            disabled={!filteredCases || filteredCases.length === 0 || exportExcelMutation.isPending}
+            variant="outline"
+            className="gap-2"
+            title="Exportar para Excel"
+          >
+            <Download className="w-4 h-4" />
+            Excel
+          </Button>
+          <Button
+            onClick={() => navigate("/cases/new")}
+            className="gap-2 bg-accent hover:bg-accent/90"
+          >
+            <Plus className="w-4 h-4" />
+            Novo Processo
+          </Button>
+        </div>
       </div>
 
       {/* Filters */}

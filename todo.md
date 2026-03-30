@@ -190,3 +190,11 @@
 - [x] Corrigir componentes frontend (rotas /case/* → /cases/*, bulk sync com await, filtro de status)
 - [x] Implementar CRUD completo (Create, Read, Update, Delete, Search funcionando)
 - [x] Testar operações CRUD (77 testes passando)
+
+
+## Funcionalidade de Exportação de Processos (Nova Feature)
+- [x] Criar procedures tRPC para exportar processos (PDF e Excel)
+- [x] Implementar geração de PDF com pdf-lib
+- [x] Implementar geração de Excel com exceljs
+- [x] Adicionar botões de exportação ao frontend
+- [x] Testar exportações (77 testes passando)
