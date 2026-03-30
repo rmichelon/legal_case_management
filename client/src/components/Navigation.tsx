@@ -18,6 +18,7 @@ import {
   ChevronDown,
 } from "lucide-react";
 import NotificationBell from "./NotificationBell";
+import GlobalSearch from "./GlobalSearch";
 import { useState } from "react";
 
 interface MenuGroup {
@@ -218,7 +219,8 @@ export default function Navigation() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
+          <GlobalSearch />
           <NotificationBell />
           <Button
             variant="outline"

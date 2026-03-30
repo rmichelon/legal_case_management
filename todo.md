@@ -174,3 +174,11 @@
 - [x] Criar sistema de controle de acesso (admin/advogado/sócio/manager)
 - [x] Implementar métricas de performance
 - [x] Criar testes do módulo de controladoria (20 testes passando)
+
+
+## Barra de Busca Global (Nova Feature)
+- [x] Criar procedure tRPC para busca global
+- [x] Criar componente GlobalSearch com dropdown de resultados
+- [x] Integrar GlobalSearch ao Navigation
+- [x] Testar busca em tempo real
+- [x] Implementar atalho de teclado (Ctrl+K)

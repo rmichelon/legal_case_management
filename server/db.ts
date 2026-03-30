@@ -1397,3 +1397,22 @@ export async function deleteControladoriaAccess(id: number) {
 
   return await db.delete(controladoriaAccess).where(eq(controladoriaAccess.id, id));
 }
+
+
+// ============ GLOBAL SEARCH QUERIES ============
+
+export async function searchClients(query: string, userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  return await db.select().from(clients)
+    .where(and(
+      eq(clients.userId, userId),
+      or(
+        like(clients.name, query as any),
+        like(clients.email, query as any),
+        like(clients.phone, query as any)
+      )
+    ))
+    .limit(10);
+}

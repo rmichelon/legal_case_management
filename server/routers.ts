@@ -462,5 +462,25 @@ export const appRouter = router({
   webhook: webhookRouter,
   caseManagement: caseManagementRouter,
   lawyers: lawyerRouter,
+
+  search: router({
+    global: protectedProcedure
+      .input(z.object({ query: z.string().min(1).max(100) }))
+      .query(async ({ ctx, input }) => {
+        const query = `%${input.query}%`;
+        const userId = ctx.user.id;
+
+        const cases = await db.searchCases(query, userId);
+        const clients = await db.searchClients(query, userId);
+        const lawyers = await db.searchLawyers(query, userId);
+
+        return {
+          cases: cases || [],
+          clients: clients || [],
+          lawyers: lawyers || [],
+          total: (cases?.length || 0) + (clients?.length || 0) + (lawyers?.length || 0),
+        };
+      }),
+  }),
 });
 export type AppRouter = typeof appRouter;
