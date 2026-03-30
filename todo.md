@@ -198,3 +198,15 @@
 - [x] Implementar geração de Excel com exceljs
 - [x] Adicionar botões de exportação ao frontend
 - [x] Testar exportações (77 testes passando)
+
+## Aprimoramento do CRUD de Processos (Nova Feature)
+- [x] Página de edição com validação robusta de formulário
+- [x] Validação de campos com Zod (número de processo, datas, etc)
+- [x] Validação de datas (encerramento > protocolo)
+- [x] Campos adicionais (status, datas de protocolo e encerramento)
+- [x] Integração com tRPC para atualização de processos
+- [x] Botão de edição na tabela de gestão de processos
+- [x] Botão de delete com confirmação de segurança
+- [x] Navegação corrigida para detalhes do processo após edição
+- [x] Testes automatizados para update e delete (4 novos testes)
+- [x] Todos os 81 testes passando

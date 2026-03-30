@@ -31,6 +31,8 @@ import {
   AlertCircle,
   CheckCircle2,
   Clock,
+  Edit,
+  Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -121,6 +123,17 @@ export default function CaseManagement() {
     },
     onError: (error: any) => {
       toast.error(`Erro ao exportar Excel: ${error.message}`);
+    },
+  });
+
+  // Delete case mutation
+  const deleteMutation = trpc.cases.delete.useMutation({
+    onSuccess: () => {
+      toast.success("Processo deletado com sucesso");
+      refetch();
+    },
+    onError: (error: any) => {
+      toast.error(`Erro ao deletar processo: ${error.message}`);
     },
   });
 
@@ -466,6 +479,30 @@ export default function CaseManagement() {
                             title="Relatório"
                           >
                             <Download className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() =>
+                              navigate(`/cases/${caseItem.id}/edit`)
+                            }
+                            title="Editar"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              if (confirm(`Deseja realmente deletar o processo ${caseItem.caseNumber}?`)) {
+                                deleteMutation.mutate({ id: caseItem.id });
+                              }
+                            }}
+                            disabled={deleteMutation.isPending}
+                            title="Deletar"
+                            className="text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
                       </TableCell>
