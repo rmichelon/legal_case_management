@@ -96,6 +96,7 @@ export default function CaseManagement() {
   const filteredCases = useMemo(() => {
     if (!cases) return [];
     return cases.filter((c) => {
+      if (filters.status && c.status !== filters.status) return false;
       if (filters.court && c.court !== filters.court) return false;
       if (filters.clientId && c.clientId !== parseInt(filters.clientId))
         return false;
@@ -125,17 +126,25 @@ export default function CaseManagement() {
       return;
     }
     
-    // Sincronizar cada processo selecionado
+    let successCount = 0;
     for (const caseId of selectedCases) {
       const caseItem = filteredCases.find(c => c.id === caseId);
       if (caseItem) {
-        syncMutation.mutate({
-          caseId,
-          processNumber: caseItem.caseNumber,
-        });
+        try {
+          await syncMutation.mutateAsync({
+            caseId,
+            processNumber: caseItem.caseNumber,
+          });
+          successCount++;
+        } catch (error) {
+          console.error(`Erro ao sincronizar ${caseItem.caseNumber}:`, error);
+        }
       }
     }
+    
     setSelectedCases([]);
+    toast.success(`${successCount}/${selectedCases.length} processo(s) sincronizado(s)`);
+    refetch();
   };
 
   const getStatusBadge = (status: string) => {
@@ -176,7 +185,7 @@ export default function CaseManagement() {
           </p>
         </div>
         <Button
-          onClick={() => navigate("/case/new")}
+          onClick={() => navigate("/cases/new")}
           className="gap-2 bg-accent hover:bg-accent/90"
         >
           <Plus className="w-4 h-4" />
@@ -374,7 +383,7 @@ export default function CaseManagement() {
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              navigate(`/case/${caseItem.id}`)
+                              navigate(`/cases/${caseItem.id}`)
                             }
                             title="Visualizar"
                           >

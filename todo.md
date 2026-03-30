@@ -182,3 +182,11 @@
 - [x] Integrar GlobalSearch ao Navigation
 - [x] Testar busca em tempo real
 - [x] Implementar atalho de teclado (Ctrl+K)
+
+
+## Correção do Módulo de Gestão de Processos (BUG FIX)
+- [x] Diagnosticar problemas no módulo (rotas incorretas, filtros não funcionando, bulk sync quebrado)
+- [x] Corrigir procedures tRPC (procedures estão corretas)
+- [x] Corrigir componentes frontend (rotas /case/* → /cases/*, bulk sync com await, filtro de status)
+- [x] Implementar CRUD completo (Create, Read, Update, Delete, Search funcionando)
+- [x] Testar operações CRUD (77 testes passando)
