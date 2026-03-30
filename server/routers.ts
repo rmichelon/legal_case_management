@@ -166,6 +166,23 @@ export const appRouter = router({
         return await db.deleteCase(input.id);
       }),
 
+    softDelete: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ ctx, input }) => {
+        return await db.softDeleteCase(input.id, ctx.user.id);
+      }),
+
+    restore: protectedProcedure
+      .input(z.object({ id: z.number() }))
+      .mutation(async ({ input }) => {
+        return await db.restoreCase(input.id);
+      }),
+
+    listDeleted: protectedProcedure
+      .query(async ({ ctx }) => {
+        return await db.getDeletedCasesByUserId(ctx.user.id);
+      }),
+
     search: protectedProcedure
       .input(z.object({ query: z.string() }))
       .query(async ({ ctx, input }) => {

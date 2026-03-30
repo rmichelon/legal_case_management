@@ -61,6 +61,8 @@ export const cases = mysqlTable("cases", {
   filingDate: timestamp("filingDate"),
   estimatedClosureDate: timestamp("estimatedClosureDate"),
   priority: mysqlEnum("priority", ["low", "medium", "high", "urgent"]).default("medium").notNull(),
+  deletedAt: timestamp("deletedAt"), // Soft-delete timestamp
+  deletedBy: int("deletedBy"), // User ID who deleted
   createdAt: timestamp("createdAt").defaultNow().notNull(),
   updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
 });

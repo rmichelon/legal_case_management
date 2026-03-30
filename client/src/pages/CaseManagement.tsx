@@ -129,10 +129,10 @@ export default function CaseManagement() {
     },
   });
 
-  // Delete case mutation
-  const deleteMutation = trpc.cases.delete.useMutation({
+  // Soft delete case mutation
+  const deleteMutation = trpc.cases.softDelete.useMutation({
     onSuccess: () => {
-      toast.success("Processo deletado com sucesso");
+      toast.success("Processo movido para lixeira. Você pode recuperá-lo em até 30 dias.");
       setDeleteModalOpen(false);
       setCaseToDelete(null);
       refetch();

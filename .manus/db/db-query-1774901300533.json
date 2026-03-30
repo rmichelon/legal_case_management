@@ -1,0 +1,9 @@
+{
+  "query": "ALTER TABLE `cases` ADD `deletedAt` timestamp;\nALTER TABLE `cases` ADD `deletedBy` int;",
+  "command": "mysql --batch --raw --column-names --default-character-set=utf8mb4 --host gateway05.us-east-1.prod.aws.tidbcloud.com --port 4000 --user 4JmTGmy9K22Wdqm.root --database oM7einhUMhTDPQpPd3FStv --execute ALTER TABLE `cases` ADD `deletedAt` timestamp;\nALTER TABLE `cases` ADD `deletedBy` int;",
+  "rows": [],
+  "messages": [],
+  "stdout": "",
+  "stderr": "",
+  "execution_time_ms": 388
+}

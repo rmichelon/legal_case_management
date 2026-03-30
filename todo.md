@@ -225,3 +225,14 @@
 - [x] Verificar configuração de tRPC e contexto
 - [x] Reiniciar servidor após correções
 - [x] Validar que erros de JSON parsing foram resolvidos
+
+
+## Soft-Delete de Processos com Recuperação (Nova Feature)
+- [x] Atualizar schema com campos deletedAt e deletedBy
+- [x] Criar migration SQL para adicionar campos
+- [x] Implementar procedures tRPC para soft-delete e restore
+- [x] Criar página de Lixeira para gerenciar processos deletados
+- [x] Integrar soft-delete no CaseManagement
+- [x] Adicionar limpeza automática após 30 dias
+- [x] Escrever testes para soft-delete e restore (6 testes)
+- [x] Validar e salvar checkpoint

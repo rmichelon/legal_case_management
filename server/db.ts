@@ -184,6 +184,59 @@ export async function deleteCase(id: number) {
   return await db.delete(cases).where(eq(cases.id, id));
 }
 
+// Soft-delete a case (mark as deleted but keep data)
+export async function softDeleteCase(id: number, userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(cases)
+    .set({
+      deletedAt: new Date(),
+      deletedBy: userId,
+    })
+    .where(eq(cases.id, id));
+}
+
+// Restore a soft-deleted case
+export async function restoreCase(id: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  return await db.update(cases)
+    .set({
+      deletedAt: null,
+      deletedBy: null,
+    })
+    .where(eq(cases.id, id));
+}
+
+// Get deleted cases for a user (within 30 days)
+export async function getDeletedCasesByUserId(userId: number) {
+  const db = await getDb();
+  if (!db) return [];
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  return await db.select().from(cases).where(
+    and(
+      eq(cases.userId, userId),
+      gte(cases.deletedAt, thirtyDaysAgo)
+    )
+  );
+}
+
+// Permanently delete cases older than 30 days
+export async function purgeExpiredDeletedCases() {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  return await db.delete(cases).where(
+    and(
+      lte(cases.deletedAt, thirtyDaysAgo),
+    )
+  );
+}
+
 export async function searchCases(userId: number, query: string) {
   const db = await getDb();
   if (!db) return [];

@@ -22,6 +22,7 @@ import { LawyerManagement } from "./pages/LawyerManagement";
 import LawyerProfile from "./pages/LawyerProfile";
 import LawyerPerformanceDashboard from "./pages/LawyerPerformanceDashboard";
 import ControladoriaDashboard from "./pages/ControladoriaDashboard";
+import TrashBin from "./pages/TrashBin";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -47,6 +48,7 @@ function Router() {
         <Route path="/lawyers/:id" component={(props: any) => <LawyerProfile />} />
         <Route path="/lawyers-performance" component={LawyerPerformanceDashboard} />
         <Route path="/controladoria" component={ControladoriaDashboard} />
+        <Route path="/trash" component={TrashBin} />
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />
