@@ -1,5 +1,6 @@
-import { PDFDocument, PDFPage, rgb, type RGB } from "pdf-lib";
+import { PDFDocument, PDFPage, rgb } from "pdf-lib";
 import ExcelJS from "exceljs";
+import { CaseItem } from "@/types";
 
 interface CaseExportData {
   id: number;
@@ -54,16 +55,15 @@ export class ExportService {
     yPosition -= 25;
 
     // Tabela de processos
-    let currentPage = page;
     for (const caseItem of cases) {
       if (yPosition < 100) {
         // Próxima página se necessário
-        currentPage = pdfDoc.addPage([595, 842]);
-        yPosition = 842 - 50;
+        yPosition = height - 50;
+        pdfDoc.addPage([595, 842]);
       }
 
       // Número do processo
-      currentPage.drawText(`Nº: ${caseItem.caseNumber}`, {
+      page.drawText(`Nº: ${caseItem.caseNumber}`, {
         x: 50,
         y: yPosition,
         size: 11,
@@ -72,7 +72,7 @@ export class ExportService {
       yPosition -= 15;
 
       // Título
-      currentPage.drawText(`Título: ${caseItem.title}`, {
+      page.drawText(`Título: ${caseItem.title}`, {
         x: 50,
         y: yPosition,
         size: 10,
@@ -81,7 +81,7 @@ export class ExportService {
       yPosition -= 12;
 
       // Tribunal
-      currentPage.drawText(`Tribunal: ${caseItem.court}`, {
+      page.drawText(`Tribunal: ${caseItem.court}`, {
         x: 50,
         y: yPosition,
         size: 9,
@@ -91,7 +91,7 @@ export class ExportService {
 
       // Status
       const statusColor = this.getStatusColor(caseItem.status);
-      currentPage.drawText(`Status: ${caseItem.status}`, {
+      page.drawText(`Status: ${caseItem.status}`, {
         x: 50,
         y: yPosition,
         size: 9,
@@ -100,7 +100,7 @@ export class ExportService {
       yPosition -= 12;
 
       // Prioridade
-      currentPage.drawText(`Prioridade: ${caseItem.priority}`, {
+      page.drawText(`Prioridade: ${caseItem.priority}`, {
         x: 50,
         y: yPosition,
         size: 9,
@@ -109,7 +109,7 @@ export class ExportService {
       yPosition -= 12;
 
       // Data de atualização
-      currentPage.drawText(`Última atualização: ${new Date(caseItem.updatedAt).toLocaleDateString("pt-BR")}`, {
+      page.drawText(`Última atualização: ${new Date(caseItem.updatedAt).toLocaleDateString("pt-BR")}`, {
         x: 50,
         y: yPosition,
         size: 8,
@@ -118,7 +118,7 @@ export class ExportService {
       yPosition -= 20;
 
       // Linha separadora
-      currentPage.drawLine({
+      page.drawLine({
         start: { x: 50, y: yPosition },
         end: { x: 545, y: yPosition },
         color: rgb(0.8, 0.8, 0.8),
@@ -192,8 +192,8 @@ export class ExportService {
   /**
    * Retorna cor RGB baseada no status
    */
-  private static getStatusColor(status: string): RGB {
-    const colors: Record<string, RGB> = {
+  private static getStatusColor(status: string): { red: number; green: number; blue: number } {
+    const colors: Record<string, { red: number; green: number; blue: number }> = {
       open: rgb(0, 0.5, 0), // Verde
       suspended: rgb(1, 0.65, 0), // Laranja
       closed: rgb(0.5, 0.5, 0.5), // Cinza
