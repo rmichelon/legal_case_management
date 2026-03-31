@@ -261,3 +261,13 @@
 - [x] Atualizar lógica de filtro para ignorar "all"
 - [x] Atualizar estado inicial dos filtros
 - [x] Testar página de busca
+
+
+## Remover Menu Superior e Corrigir Erros (Nova Feature)
+- [x] Diagnosticar erros de sistema e formulários
+- [x] Remover componente Navigation do App.tsx
+- [x] Ajustar layout após remoção do menu
+- [x] Corrigir erros de formulários
+- [x] Corrigir erros de sistema
+- [x] Testar todas as páginas
+- [x] Salvar checkpoint

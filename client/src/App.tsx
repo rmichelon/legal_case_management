@@ -4,7 +4,7 @@ import NotFound from "@/pages/NotFound";
 import { Route, Switch } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
-import Navigation from "./components/Navigation";
+
 import Home from "./pages/Home";
 import Dashboard from "./pages/Dashboard";
 import CaseForm from "./pages/CaseForm";
@@ -29,7 +29,6 @@ function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <>
-      <Navigation />
       <div className="flex">
         <Sidebar />
         <main className="flex-1">
