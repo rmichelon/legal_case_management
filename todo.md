@@ -236,3 +236,13 @@
 - [x] Adicionar limpeza automática após 30 dias
 - [x] Escrever testes para soft-delete e restore (6 testes)
 - [x] Validar e salvar checkpoint
+
+
+## Reorganização do Menu Lateral em Árvore (Nova Feature)
+- [x] Analisar menu atual e estrutura de navegação
+- [x] Criar componente TreeMenu com suporte a grupos colapsáveis
+- [x] Reorganizar rotas em estrutura hierárquica
+- [x] Integrar novo menu no Navigation
+- [x] Testar colapso/expansão de grupos
+- [x] Validar responsividade mobile
+- [x] Salvar checkpoint

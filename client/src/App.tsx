@@ -23,13 +23,17 @@ import LawyerProfile from "./pages/LawyerProfile";
 import LawyerPerformanceDashboard from "./pages/LawyerPerformanceDashboard";
 import ControladoriaDashboard from "./pages/ControladoriaDashboard";
 import TrashBin from "./pages/TrashBin";
+import Sidebar from "./components/Sidebar";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
   return (
     <>
       <Navigation />
-      <Switch>
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1">
+          <Switch>
         <Route path="/" component={Home} />
         <Route path="/dashboard" component={Dashboard} />
         <Route path="/cases/new" component={() => <CaseForm caseId={undefined} />} />
@@ -52,7 +56,9 @@ function Router() {
         <Route path="/404" component={NotFound} />
         {/* Final fallback route */}
         <Route component={NotFound} />
-      </Switch>
+          </Switch>
+        </main>
+      </div>
     </>
   );
 }
