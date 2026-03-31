@@ -271,3 +271,14 @@
 - [x] Corrigir erros de sistema
 - [x] Testar todas as páginas
 - [x] Salvar checkpoint
+
+
+## Novas Funcionalidades do Módulo de Advogados
+- [x] Filtros avançados (especialidade, experiência, taxa horária)
+- [x] Edição inline de dados de advogados
+- [x] Atribuição de casos aos advogados (já existente)
+- [x] Visualização de métricas de desempenho
+- [x] Histórico de atividades por advogado
+- [x] Componentes criados: LawyerAdvancedFilters, LawyerEditDialog, LawyerPerformanceMetrics, LawyerActivityLog
+- [x] Escrever testes para novas funcionalidades
+- [x] Salvar checkpoint
