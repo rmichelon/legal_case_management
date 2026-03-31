@@ -20,8 +20,8 @@ export default function SearchCases() {
   const { isAuthenticated, loading } = useAuth();
   const [, navigate] = useLocation();
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("");
-  const [priorityFilter, setPriorityFilter] = useState<string>("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [priorityFilter, setPriorityFilter] = useState<string>("all");
 
   const { data: cases = [] } = trpc.cases.list.useQuery(undefined, {
     enabled: isAuthenticated,
@@ -34,8 +34,8 @@ export default function SearchCases() {
 
   // Filter results based on selected filters
   const filteredResults = (searchQuery ? searchResults : cases).filter((caseItem: any) => {
-    if (statusFilter && caseItem.status !== statusFilter) return false;
-    if (priorityFilter && caseItem.priority !== priorityFilter) return false;
+    if (statusFilter && statusFilter !== "all" && caseItem.status !== statusFilter) return false;
+    if (priorityFilter && priorityFilter !== "all" && caseItem.priority !== priorityFilter) return false;
     return true;
   });
 
@@ -101,7 +101,7 @@ export default function SearchCases() {
                     <SelectValue placeholder="Todos os status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos os status</SelectItem>
+                    <SelectItem value="all">Todos os status</SelectItem>
                     <SelectItem value="open">Ativo</SelectItem>
                     <SelectItem value="suspended">Suspenso</SelectItem>
                     <SelectItem value="closed">Fechado</SelectItem>
@@ -117,7 +117,7 @@ export default function SearchCases() {
                     <SelectValue placeholder="Todas as prioridades" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todas as prioridades</SelectItem>
+                    <SelectItem value="all">Todas as prioridades</SelectItem>
                     <SelectItem value="low">Baixa</SelectItem>
                     <SelectItem value="medium">Média</SelectItem>
                     <SelectItem value="high">Alta</SelectItem>
@@ -131,8 +131,8 @@ export default function SearchCases() {
                   variant="outline"
                   onClick={() => {
                     setSearchQuery("");
-                    setStatusFilter("");
-                    setPriorityFilter("");
+                    setStatusFilter("all");
+                    setPriorityFilter("all");
                   }}
                   className="w-full"
                 >

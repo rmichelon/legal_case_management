@@ -253,3 +253,11 @@
 - [x] Ajustar variáveis CSS para tema escuro
 - [x] Validar contraste e legibilidade
 - [x] Salvar checkpoint
+
+
+## Correção de Erro Select.Item (Bug Fix)
+- [x] Localizar SelectItem com value vazio em SearchCases.tsx
+- [x] Alterar value vazio para "all" em ambos os selects
+- [x] Atualizar lógica de filtro para ignorar "all"
+- [x] Atualizar estado inicial dos filtros
+- [x] Testar página de busca
