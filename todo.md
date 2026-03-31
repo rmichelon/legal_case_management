@@ -246,3 +246,10 @@
 - [x] Testar colapso/expansão de grupos
 - [x] Validar responsividade mobile
 - [x] Salvar checkpoint
+
+
+## Alteração para Modo Escuro (Nova Feature)
+- [x] Atualizar ThemeProvider para dark
+- [x] Ajustar variáveis CSS para tema escuro
+- [x] Validar contraste e legibilidade
+- [x] Salvar checkpoint
