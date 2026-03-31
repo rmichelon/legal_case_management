@@ -282,3 +282,17 @@
 - [x] Componentes criados: LawyerAdvancedFilters, LawyerEditDialog, LawyerPerformanceMetrics, LawyerActivityLog
 - [x] Escrever testes para novas funcionalidades
 - [x] Salvar checkpoint
+
+
+## Integração e Expansão do Módulo de Advogados (Em Progresso)
+- [x] Corrigir SelectItems com value vazio no CaseManagement
+- [ ] Integrar LawyerAdvancedFilters na página LawyerManagement
+- [ ] Integrar LawyerEditDialog na página LawyerManagement
+- [ ] Integrar LawyerPerformanceMetrics na página LawyerManagement
+- [ ] Integrar LawyerActivityLog na página LawyerManagement
+- [ ] Criar página de detalhes do advogado (LawyerDetailPage.tsx)
+- [ ] Adicionar relatórios de produtividade em PDF
+- [ ] Implementar notificações de prazos perdidos
+- [ ] Adicionar gráficos de tendência de desempenho
+- [ ] Testar integração completa
+- [ ] Salvar checkpoint final

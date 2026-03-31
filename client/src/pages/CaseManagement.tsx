@@ -310,7 +310,7 @@ export default function CaseManagement() {
                 <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="open">Aberto</SelectItem>
                 <SelectItem value="suspended">Suspenso</SelectItem>
                 <SelectItem value="closed">Encerrado</SelectItem>
@@ -329,7 +329,7 @@ export default function CaseManagement() {
                 <SelectValue placeholder="Tribunal" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 <SelectItem value="Vara Cível">Vara Cível</SelectItem>
                 <SelectItem value="Vara Criminal">Vara Criminal</SelectItem>
                 <SelectItem value="Vara Trabalhista">Vara Trabalhista</SelectItem>
@@ -348,7 +348,7 @@ export default function CaseManagement() {
                 <SelectValue placeholder="Cliente" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Todos</SelectItem>
+                <SelectItem value="all">Todos</SelectItem>
                 {clients?.map((client) => (
                   <SelectItem key={client.id} value={client.id.toString()}>
                     {client.name}
